@@ -1,4 +1,4 @@
-use std::io;
+use serde::{Deserialize, Serialize};
 
 use super::decoder_z80::DecoderZ80;
 use super::environment::Environment;
@@ -183,14 +183,26 @@ impl Cpu {
     pub fn cycle_count(&self) -> u64 {
         self.state.cycle
     }
+}
 
-    // Serialize the current state of the CPU
-    pub fn serialize(&self) -> Vec<u8> {
-        self.state.serialize()
+impl Serialize for Cpu {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.state.serialize(serializer)
     }
+}
 
-    // Update the CPU state from a serialized state
-    pub fn deserialize(&mut self, data: &[u8]) -> io::Result<()> {
-        self.state.deserialize(data)
+impl<'de> Deserialize<'de> for Cpu {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Cpu {
+            state: State::deserialize(deserializer)?,
+            trace: false,
+            decoder: DecoderZ80::new(),
+        })
     }
 }

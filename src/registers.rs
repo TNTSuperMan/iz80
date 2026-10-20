@@ -1,4 +1,6 @@
-use std::{fmt, io, mem};
+use std::{fmt, mem};
+
+use serde::{Deserialize, Serialize};
 
 /// 8 bit registers
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -42,7 +44,7 @@ pub enum Reg8 {
 const REG_COUNT8: usize = 16;
 
 /// 16 bit registers, composed from 8 bit registers
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum Reg16 {
     /// 16 bit register AF
@@ -94,7 +96,7 @@ impl fmt::Display for Reg8 {
 }
 
 /// Z80 internal register values
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Registers {
     data: [u8; REG_COUNT8],
     shadow: [u8; REG_COUNT8],
@@ -404,47 +406,6 @@ impl Registers {
 
     pub(crate) fn end_nmi(&mut self) {
         self.iff1 = self.iff2;
-    }
-
-    pub(crate) const SERIALIZE_SIZE: usize = REG_COUNT8 + REG_COUNT8 + 5;
-
-    pub(crate) fn serialize(&self) -> [u8; Registers::SERIALIZE_SIZE] {
-        let mut data = [0; Registers::SERIALIZE_SIZE];
-        let mut i = 0;
-        for r in self.data.iter() {
-            data[i] = *r;
-            i += 1;
-        }
-        for r in self.shadow.iter() {
-            data[i] = *r;
-            i += 1;
-        }
-        data[i] = self.pc as u8;
-        data[i + 1] = (self.pc >> 8) as u8;
-        data[i + 2] = self.iff1 as u8;
-        data[i + 3] = self.iff2 as u8;
-        data[i + 4] = self.im;
-        data
-    }
-
-    pub(crate) fn deserialize(&mut self, data: &[u8]) -> io::Result<()> {
-        if data.len() < Registers::SERIALIZE_SIZE {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "Data too short"));
-        }
-        let mut i = 0;
-        for r in self.data.iter_mut() {
-            *r = data[i];
-            i += 1;
-        }
-        for r in self.shadow.iter_mut() {
-            *r = data[i];
-            i += 1;
-        }
-        self.pc = u16::from_le_bytes([data[i], data[i + 1]]);
-        self.iff1 = data[i + 2] != 0;
-        self.iff2 = data[i + 3] != 0;
-        self.im = data[i + 4];
-        Ok(())
     }
 }
 

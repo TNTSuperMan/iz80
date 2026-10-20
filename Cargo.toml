@@ -11,3 +11,4 @@ repository = "https://github.com/ivanizag/iz80"
 readme = "README.md"
 
 [dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
