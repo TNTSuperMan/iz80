@@ -17,7 +17,7 @@ fn test_ei() {
     cpu.signal_interrupt(true);
     cpu.execute_instruction(&mut sys);
 
-    assert_eq!(IRQ_ADDRESS+1, cpu.registers().pc());
+    assert_eq!(IRQ_ADDRESS + 1, cpu.registers().pc());
 }
 
 #[test]
@@ -48,9 +48,9 @@ fn test_ei_on_handler() {
     sys.poke(0x0002, 0x56);
 
     sys.poke(IRQ_ADDRESS, 0x00); // NOP
-    sys.poke(IRQ_ADDRESS+1, 0xfb); // EI
-    sys.poke(IRQ_ADDRESS+2, 0xed); // RETI
-    sys.poke(IRQ_ADDRESS+3, 0x4d);
+    sys.poke(IRQ_ADDRESS + 1, 0xfb); // EI
+    sys.poke(IRQ_ADDRESS + 2, 0xed); // RETI
+    sys.poke(IRQ_ADDRESS + 3, 0x4d);
 
     cpu.execute_instruction(&mut sys);
     cpu.execute_instruction(&mut sys);
@@ -59,7 +59,7 @@ fn test_ei_on_handler() {
 
     cpu.execute_instruction(&mut sys);
     // On the handler, NOP executed
-    assert_eq!(IRQ_ADDRESS+1, cpu.registers().pc());
+    assert_eq!(IRQ_ADDRESS + 1, cpu.registers().pc());
 
     cpu.signal_interrupt(false);
 
@@ -85,9 +85,9 @@ fn test_ei_on_handler_int_not_lowered() {
     sys.poke(0x0002, 0x56);
 
     sys.poke(IRQ_ADDRESS, 0x00); // NOP
-    sys.poke(IRQ_ADDRESS+1, 0xfb); // EI
-    sys.poke(IRQ_ADDRESS+2, 0xed); // RETI
-    sys.poke(IRQ_ADDRESS+3, 0x4d);
+    sys.poke(IRQ_ADDRESS + 1, 0xfb); // EI
+    sys.poke(IRQ_ADDRESS + 2, 0xed); // RETI
+    sys.poke(IRQ_ADDRESS + 3, 0x4d);
 
     cpu.execute_instruction(&mut sys);
     cpu.execute_instruction(&mut sys);
@@ -96,7 +96,7 @@ fn test_ei_on_handler_int_not_lowered() {
 
     cpu.execute_instruction(&mut sys);
     // On the handler, NOP executed
-    assert_eq!(IRQ_ADDRESS+1, cpu.registers().pc());
+    assert_eq!(IRQ_ADDRESS + 1, cpu.registers().pc());
 
     cpu.execute_instruction(&mut sys);
     // On the handler, EI executed
@@ -107,5 +107,5 @@ fn test_ei_on_handler_int_not_lowered() {
 
     cpu.execute_instruction(&mut sys);
     // On the handler again, as interrupts are raised and enabled
-    assert_eq!(IRQ_ADDRESS+1, cpu.registers().pc());
+    assert_eq!(IRQ_ADDRESS + 1, cpu.registers().pc());
 }

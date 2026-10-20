@@ -49,7 +49,8 @@ impl TimedRunner {
             if cycles_elapsed > self.quantum_cycles {
                 // Let's sleep if needed
                 let now = Instant::now();
-                let target_time = self.prev_time + Duration::from_nanos((cycles_elapsed as f64 * 1000.0 / self.mhz) as u64);
+                let target_time = self.prev_time
+                    + Duration::from_nanos((cycles_elapsed as f64 * 1000.0 / self.mhz) as u64);
 
                 if now < target_time {
                     std::thread::sleep(target_time - now);

@@ -1,14 +1,14 @@
 use super::cpu::*;
+use super::environment::*;
 use super::opcode::*;
 use super::opcode_alu::*;
 use super::opcode_arith::*;
-use super::opcode_io::*;
 use super::opcode_bits::*;
+use super::opcode_io::*;
 use super::opcode_jumps::*;
 use super::opcode_ld::*;
 use super::operators::*;
 use super::registers::*;
-use super::environment::*;
 
 /* See
     http://www.z80.info/decoding.htm
@@ -23,7 +23,7 @@ pub struct Decoder8080 {
 impl Decoder8080 {
     pub fn new() -> Decoder8080 {
         Decoder8080 {
-            no_prefix: no_prefix_opcodes()
+            no_prefix: no_prefix_opcodes(),
         }
     }
 }
@@ -35,7 +35,7 @@ impl Decoder for Decoder8080 {
     }
 }
 
-fn no_prefix_opcodes() -> [Opcode;256] {
+fn no_prefix_opcodes() -> [Opcode; 256] {
     let mut opcodes_vector = Vec::with_capacity(256);
     for c in 0..=255 {
         let p = DecodingHelper::parts(c);
@@ -112,49 +112,50 @@ fn no_prefix_opcodes() -> [Opcode;256] {
         opcodes_vector.push(opcode);
     }
 
-    let mut opcodes = opcodes_vector.try_into().unwrap_or_else(|_| { panic!("missing opcodes")});
+    let mut opcodes = opcodes_vector
+        .try_into()
+        .unwrap_or_else(|_| panic!("missing opcodes"));
     load_cycle_information(&mut opcodes);
     opcodes
 }
 
 fn load_cycle_information(opcodes: &mut [Opcode; 256]) {
-
     // Load cycle information
     for c in 0..=255 {
-            opcodes[c].cycles = NO_PREFIX_CYCLES[c];
-            opcodes[c].cycles_conditional = opcodes[c].cycles;
+        opcodes[c].cycles = NO_PREFIX_CYCLES[c];
+        opcodes[c].cycles_conditional = opcodes[c].cycles;
     }
 
     //Load cycle information for conditional cases
-    opcodes[0xc0].cycles_conditional =  5;
+    opcodes[0xc0].cycles_conditional = 5;
     opcodes[0xc4].cycles_conditional = 11;
-    opcodes[0xc8].cycles_conditional =  5;
+    opcodes[0xc8].cycles_conditional = 5;
     opcodes[0xcc].cycles_conditional = 11;
 
-    opcodes[0xd0].cycles_conditional =  5;
+    opcodes[0xd0].cycles_conditional = 5;
     opcodes[0xd4].cycles_conditional = 11;
-    opcodes[0xd8].cycles_conditional =  5;
+    opcodes[0xd8].cycles_conditional = 5;
     opcodes[0xdc].cycles_conditional = 11;
 
-    opcodes[0xe0].cycles_conditional =  5;
+    opcodes[0xe0].cycles_conditional = 5;
     opcodes[0xe4].cycles_conditional = 11;
-    opcodes[0xe8].cycles_conditional =  5;
+    opcodes[0xe8].cycles_conditional = 5;
     opcodes[0xec].cycles_conditional = 11;
 
-    opcodes[0xf0].cycles_conditional =  5;
+    opcodes[0xf0].cycles_conditional = 5;
     opcodes[0xf4].cycles_conditional = 11;
-    opcodes[0xf8].cycles_conditional =  5;
+    opcodes[0xf8].cycles_conditional = 5;
     opcodes[0xfc].cycles_conditional = 11;
     // Note that on the 8080 the conditional jumps use always the same number of cycles
 }
 
 struct DecodingHelper {
-    // See notation in http://www.z80.info/decoding.htm    
+    // See notation in http://www.z80.info/decoding.htm
     x: usize,
     y: usize,
     z: usize,
     p: usize,
-    q: usize
+    q: usize,
 }
 
 impl DecodingHelper {
@@ -169,30 +170,39 @@ impl DecodingHelper {
     }
 }
 
-const RP:  [Reg16; 4] = [Reg16::BC, Reg16::DE, Reg16::HL, Reg16::SP];
+const RP: [Reg16; 4] = [Reg16::BC, Reg16::DE, Reg16::HL, Reg16::SP];
 const RP2: [Reg16; 4] = [Reg16::BC, Reg16::DE, Reg16::HL, Reg16::AF];
-const R:  [Reg8; 8] = [Reg8::B, Reg8::C, Reg8::D, Reg8::E, Reg8::H, Reg8::L, Reg8::_HL, Reg8::A];
+const R: [Reg8; 8] = [
+    Reg8::B,
+    Reg8::C,
+    Reg8::D,
+    Reg8::E,
+    Reg8::H,
+    Reg8::L,
+    Reg8::_HL,
+    Reg8::A,
+];
 
 const CC: [(Flag, bool, &str); 8] = [
     (Flag::Z, false, "NZ"),
-    (Flag::Z, true,  "Z"),
+    (Flag::Z, true, "Z"),
     (Flag::C, false, "NC"),
-    (Flag::C, true,  "C"),
+    (Flag::C, true, "C"),
     (Flag::P, false, "PO"),
-    (Flag::P, true,  "PE"),
+    (Flag::P, true, "PE"),
     (Flag::S, false, "P"),
-    (Flag::S, true,  "N")
+    (Flag::S, true, "N"),
 ];
 
 const ROT: [(ShiftDir, ShiftMode, &str); 8] = [
-    (ShiftDir::Left,  ShiftMode::RotateCarry, "RLC"),
+    (ShiftDir::Left, ShiftMode::RotateCarry, "RLC"),
     (ShiftDir::Right, ShiftMode::RotateCarry, "RRC"),
-    (ShiftDir::Left,  ShiftMode::Rotate,      "RL" ),
-    (ShiftDir::Right, ShiftMode::Rotate,      "RR" ),
-    (ShiftDir::Left,  ShiftMode::Arithmetic,  "SLA"),
-    (ShiftDir::Right, ShiftMode::Arithmetic,  "SRA"),
-    (ShiftDir::Left,  ShiftMode::Logical,     "SLL"),
-    (ShiftDir::Right, ShiftMode::Logical,     "SRL"),
+    (ShiftDir::Left, ShiftMode::Rotate, "RL"),
+    (ShiftDir::Right, ShiftMode::Rotate, "RR"),
+    (ShiftDir::Left, ShiftMode::Arithmetic, "SLA"),
+    (ShiftDir::Right, ShiftMode::Arithmetic, "SRA"),
+    (ShiftDir::Left, ShiftMode::Logical, "SLL"),
+    (ShiftDir::Right, ShiftMode::Logical, "SRL"),
 ];
 
 const ALU: [(Operator, &str); 8] = [
@@ -202,30 +212,20 @@ const ALU: [(Operator, &str); 8] = [
     (operator_sbc, "SBC"),
     (operator_and, "AND"),
     (operator_xor, "XOR"),
-    (operator_or,  "OR"),
-    (operator_cp,  "CP")
+    (operator_or, "OR"),
+    (operator_cp, "CP"),
 ];
 
 // From https://pastraiser.com/cpu/i8080/i8080_opcodes.html
 // From https://tobiasvl.github.io/optable/intel-8080/
 const NO_PREFIX_CYCLES: [u8; 256] = [
-     4, 10,  7,  5,  5,  5,  7,  4,  4, 10,  7,  5,  5,  5,  7,  4,
-     4, 10,  7,  5,  5,  5,  7,  4,  4, 10,  7,  5,  5,  5,  7,  4,
-     4, 10, 16,  5,  5,  5,  7,  4,  4, 10, 16,  5,  5,  5,  7,  4,
-     4, 10, 13,  5, 10, 10, 10,  4,  4, 10, 13,  5,  5,  5,  7,  4,
-
-     5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,
-     5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,
-     5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,
-     7,  7,  7,  7,  7,  7,  7,  7,  5,  5,  5,  5,  5,  5,  7,  5,
-
-     4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,
-     4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,
-     4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,
-     4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,
-
-    11, 10, 10, 10, 17, 11,  7, 11, 11, 10, 10, 10, 17, 17,  7, 11,
-    11, 10, 10, 10, 17, 11,  7, 11, 11, 10, 10, 10, 17, 17,  7, 11,
-    11, 10, 10, 18, 17, 11,  7, 11, 11,  5, 10,  4, 17, 17,  7, 11,
-    11, 10, 10,  4, 17, 11,  7, 11, 11,  5, 10,  4, 17, 17,  7, 11,
+    4, 10, 7, 5, 5, 5, 7, 4, 4, 10, 7, 5, 5, 5, 7, 4, 4, 10, 7, 5, 5, 5, 7, 4, 4, 10, 7, 5, 5, 5,
+    7, 4, 4, 10, 16, 5, 5, 5, 7, 4, 4, 10, 16, 5, 5, 5, 7, 4, 4, 10, 13, 5, 10, 10, 10, 4, 4, 10,
+    13, 5, 5, 5, 7, 4, 5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, 5,
+    5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, 7, 7, 7, 7, 7, 7, 7, 7, 5,
+    5, 5, 5, 5, 5, 7, 5, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4,
+    4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4,
+    4, 4, 4, 4, 4, 7, 4, 11, 10, 10, 10, 17, 11, 7, 11, 11, 10, 10, 10, 17, 17, 7, 11, 11, 10, 10,
+    10, 17, 11, 7, 11, 11, 10, 10, 10, 17, 17, 7, 11, 11, 10, 10, 18, 17, 11, 7, 11, 11, 5, 10, 4,
+    17, 17, 7, 11, 11, 10, 10, 4, 17, 11, 7, 11, 11, 5, 10, 4, 17, 17, 7, 11,
 ];

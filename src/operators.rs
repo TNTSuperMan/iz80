@@ -15,7 +15,9 @@ pub fn operator_adc(env: &mut Environment, a: u8, b: u8) -> u8 {
     if env.state.reg.get_flag(Flag::C) {
         vv += 1;
     }
-    env.state.reg.update_arithmetic_flags(aa, bb, vv, false, true);
+    env.state
+        .reg
+        .update_arithmetic_flags(aa, bb, vv, false, true);
     vv as u8
 }
 
@@ -38,7 +40,9 @@ pub fn operator_adc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
     let vv = vvvv as u16;
 
     // TUZD-8.6
-    env.state.reg.update_arithmetic_flags_16(aaaa, bbbb, vvvv, false);
+    env.state
+        .reg
+        .update_arithmetic_flags_16(aaaa, bbbb, vvvv, false);
     env.state.reg.put_flag(Flag::Z, vv == 0);
     vv
 }
@@ -53,7 +57,9 @@ pub fn operator_sbc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
     let vv = vvvv as u16;
 
     // TUZD-8.6
-    env.state.reg.update_arithmetic_flags_16(aaaa, bbbb, vvvv, true);
+    env.state
+        .reg
+        .update_arithmetic_flags_16(aaaa, bbbb, vvvv, true);
     env.state.reg.put_flag(Flag::Z, vv == 0);
     vv
 }
@@ -61,7 +67,9 @@ pub fn operator_sbc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
 pub fn operator_inc(env: &mut Environment, a: u8) -> u8 {
     let aa = a as u16;
     let vv = aa + 1;
-    env.state.reg.update_arithmetic_flags(aa, 0, vv, false, false);
+    env.state
+        .reg
+        .update_arithmetic_flags(aa, 0, vv, false, false);
     vv as u8
 }
 
@@ -77,14 +85,18 @@ pub fn operator_sbc(env: &mut Environment, a: u8, b: u8) -> u8 {
     if env.state.reg.get_flag(Flag::C) {
         vv = vv.wrapping_sub(1);
     }
-    env.state.reg.update_arithmetic_flags(aa, bb, vv, true, true);
+    env.state
+        .reg
+        .update_arithmetic_flags(aa, bb, vv, true, true);
     vv as u8
 }
 
 pub fn operator_dec(env: &mut Environment, a: u8) -> u8 {
     let aa = a as u16;
     let vv = aa.wrapping_sub(1);
-    env.state.reg.update_arithmetic_flags(aa, 0, vv, true, false);
+    env.state
+        .reg
+        .update_arithmetic_flags(aa, 0, vv, true, false);
     vv as u8
 }
 

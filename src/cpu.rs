@@ -1,7 +1,7 @@
 use std::io;
 
-use super::decoder_z80::DecoderZ80;
 use super::decoder_8080::Decoder8080;
+use super::decoder_z80::DecoderZ80;
 use super::environment::Environment;
 use super::machine::Machine;
 use super::opcode::Opcode;
@@ -31,7 +31,6 @@ pub(crate) trait Decoder {
 }
 
 impl Cpu {
-
     /// Returns a Z80 Cpu instance. Alias of `new_z80()`
     pub fn new() -> Cpu {
         Self::new_z80()
@@ -42,7 +41,7 @@ impl Cpu {
         Cpu {
             state: State::new(),
             trace: false,
-            decoder: Box::new(DecoderZ80::new())
+            decoder: Box::new(DecoderZ80::new()),
         }
     }
 
@@ -51,13 +50,12 @@ impl Cpu {
         let mut cpu = Cpu {
             state: State::new(),
             trace: false,
-            decoder: Box::new(Decoder8080::new())
+            decoder: Box::new(Decoder8080::new()),
         };
 
         cpu.state.reg.set_8080();
         cpu
     }
-
 }
 
 impl Default for Cpu {
@@ -76,7 +74,7 @@ impl Cpu {
     pub fn execute_instruction(&mut self, sys: &mut dyn Machine) {
         if self.is_halted() {
             // The CPU is in HALT state. Only interrupts can execute.
-            return
+            return;
         }
 
         let mut env = Environment::new(&mut self.state, sys);
@@ -86,8 +84,7 @@ impl Cpu {
             env.state.halted = false;
             env.state.reg.reset();
             env.state.cycle = env.state.cycle.wrapping_add(3);
-        }
-        else if env.state.nmi_pending {
+        } else if env.state.nmi_pending {
             env.state.nmi_pending = false;
             env.state.halted = false;
             env.state.reg.start_nmi();
@@ -103,9 +100,9 @@ impl Cpu {
                     1 => {
                         env.state.cycle = env.state.cycle.wrapping_add(13);
                         env.subroutine_call(IRQ_ADDRESS);
-                    },
+                    }
                     2 => panic!("Interrupt mode 2 not implemented"),
-                    _ => panic!("Invalid interrupt mode")
+                    _ => panic!("Invalid interrupt mode"),
                 }
             }
         }
@@ -135,8 +132,12 @@ impl Cpu {
                 self.state.reg.get8(Reg8::F),
                 self.state.cycle
             );
-            println!(" [{:02x} {:02x} {:02x}]", sys.peek(pc),
-                sys.peek(pc.wrapping_add(1)), sys.peek(pc.wrapping_add(2)));
+            println!(
+                " [{:02x} {:02x} {:02x}]",
+                sys.peek(pc),
+                sys.peek(pc.wrapping_add(1)),
+                sys.peek(pc.wrapping_add(2))
+            );
         }
     }
 

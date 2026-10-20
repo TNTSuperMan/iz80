@@ -5,15 +5,12 @@ use super::state::State;
 
 pub struct Environment<'a> {
     pub state: &'a mut State,
-    pub sys: &'a mut dyn Machine
+    pub sys: &'a mut dyn Machine,
 }
 
-impl <'a> Environment<'_> {
+impl<'a> Environment<'_> {
     pub fn new(state: &'a mut State, sys: &'a mut dyn Machine) -> Environment<'a> {
-        Environment {
-            state,
-            sys
-        }
+        Environment { state, sys }
     }
 
     pub fn peek_pc(&mut self) -> u8 {
@@ -93,7 +90,6 @@ impl <'a> Environment<'_> {
         self.state.int_just_enabled = false;
     }
 
-
     pub fn set_branch_taken(&mut self) {
         self.state.branch_taken = true;
     }
@@ -107,7 +103,6 @@ impl <'a> Environment<'_> {
         self.state.cycle = self.state.cycle.wrapping_add(cycles as u64);
     }
 
-
     pub fn index_description(&self) -> String {
         if self.state.index == Reg16::HL {
             "HL".to_string()
@@ -116,7 +111,7 @@ impl <'a> Environment<'_> {
         }
     }
 
-    pub fn is_alt_index(& self) -> bool {
+    pub fn is_alt_index(&self) -> bool {
         self.state.index != Reg16::HL
     }
 
@@ -132,7 +127,7 @@ impl <'a> Environment<'_> {
         self.state.displacement = self.advance_pc() as i8;
     }
 
-    pub fn index_value(& self) -> u16 {
+    pub fn index_value(&self) -> u16 {
         self.state.reg.get16(self.state.index)
     }
 
@@ -151,14 +146,14 @@ impl <'a> Environment<'_> {
             Reg16::IX => match reg {
                 Reg8::H => Reg8::IXH,
                 Reg8::L => Reg8::IXL,
-                _ => reg
+                _ => reg,
             },
             Reg16::IY => match reg {
                 Reg8::H => Reg8::IYH,
                 Reg8::L => Reg8::IYL,
-                _ => reg
+                _ => reg,
             },
-            _ => reg
+            _ => reg,
         }
     }
 
@@ -170,7 +165,7 @@ impl <'a> Environment<'_> {
         }
     }
 
-    pub fn reg16_ext(& self, rr: Reg16) -> u16 {
+    pub fn reg16_ext(&self, rr: Reg16) -> u16 {
         if rr == Reg16::HL {
             self.state.reg.get16(self.state.index)
         } else {

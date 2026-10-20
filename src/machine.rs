@@ -12,13 +12,12 @@ pub trait Machine {
 
     /// Returns the memory contents in [address] as word
     fn peek16(&mut self, address: u16) -> u16 {
-        self.peek(address) as u16
-        + ((self.peek(address.wrapping_add(1)) as u16) << 8)
+        self.peek(address) as u16 + ((self.peek(address.wrapping_add(1)) as u16) << 8)
     }
 
     /// Sets the memory content to the word [value] in [address]
     fn poke16(&mut self, address: u16, value: u16) {
-        self.poke(address, value as u8 );
+        self.poke(address, value as u8);
         self.poke(address.wrapping_add(1), (value >> 8) as u8);
     }
 
@@ -36,7 +35,7 @@ pub trait Machine {
 /// pokes to memory and the ins and outs of ports.
 pub struct PlainMachine {
     mem: [u8; 65536],
-    io: [u8; 65536]
+    io: [u8; 65536],
 }
 
 impl PlainMachine {
@@ -44,7 +43,7 @@ impl PlainMachine {
     pub fn new() -> PlainMachine {
         PlainMachine {
             mem: [0; 65536],
-            io: [0; 65536]
+            io: [0; 65536],
         }
     }
 }
@@ -71,8 +70,6 @@ impl Machine for PlainMachine {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -80,8 +77,8 @@ mod tests {
     #[test]
     fn set_get_byte() {
         let mut m = PlainMachine::new();
-        const A:u16 = 0x2345;
-        const V:u8 = 0xa0;
+        const A: u16 = 0x2345;
+        const V: u8 = 0xa0;
 
         m.poke(A, V);
         assert_eq!(V, m.peek(A));

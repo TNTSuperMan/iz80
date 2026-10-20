@@ -3,7 +3,7 @@ use std::io;
 use super::registers::{Reg16, Registers};
 
 /// Internal state of the CPU
-/// 
+///
 /// Stores the state of the registers and additional hidden execution
 /// state of the CPU.
 pub struct State {
@@ -23,7 +23,7 @@ pub struct State {
     /// Interrupts just enabled
     pub int_just_enabled: bool,
     // Alternate index management
-    pub index: Reg16, // Using HL, IX or IY
+    pub index: Reg16,     // Using HL, IX or IY
     pub displacement: i8, // Used for (IX+d) and (iY+d)
 }
 
@@ -56,7 +56,7 @@ impl State {
         data.push(self.nmi_pending as u8);
         data.push(self.reset_pending as u8);
         data.push(self.int_just_enabled as u8);
-       match self.index {
+        match self.index {
             Reg16::IX => data.push(1),
             Reg16::IY => data.push(2),
             _ => data.push(0),
@@ -73,19 +73,19 @@ impl State {
         err?;
 
         let i = Registers::SERIALIZE_SIZE;
-        self.cycle = u64::from_le_bytes(data[i..i+8].try_into().unwrap());
-        self.branch_taken = data[i+8] != 0;
-        self.halted = data[i+9] != 0;
-        self.int_signaled = data[i+10] != 0;
-        self.nmi_pending = data[i+11] != 0;
-        self.reset_pending = data[i+12] != 0;
-        self.int_just_enabled = data[i+13] != 0;
-        match data[i+14] {
+        self.cycle = u64::from_le_bytes(data[i..i + 8].try_into().unwrap());
+        self.branch_taken = data[i + 8] != 0;
+        self.halted = data[i + 9] != 0;
+        self.int_signaled = data[i + 10] != 0;
+        self.nmi_pending = data[i + 11] != 0;
+        self.reset_pending = data[i + 12] != 0;
+        self.int_just_enabled = data[i + 13] != 0;
+        match data[i + 14] {
             1 => self.index = Reg16::IX,
             2 => self.index = Reg16::IY,
             _ => self.index = Reg16::HL,
         }
-        self.displacement = data[i+15] as i8;
+        self.displacement = data[i + 15] as i8;
         Ok(())
     }
 }

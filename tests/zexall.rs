@@ -34,10 +34,9 @@ fn test_zexall() {
     let single_test = 11;
     if run_single_test {
         let mut test_start = machine.peek16(0x0120);
-        test_start += single_test*2;
+        test_start += single_test * 2;
         machine.poke16(0x0120, test_start);
-        machine.poke16(test_start + 2 , 0);
-    
+        machine.poke16(test_start + 2, 0);
     }
 
     cpu.registers().set_pc(0x100);
@@ -67,7 +66,7 @@ fn test_zexall() {
                 2 => {
                     // C_WRITE
                     print!("{}", cpu.registers().get8(Reg8::E) as char);
-                },
+                }
                 9 => {
                     // C_WRITE_STR
                     let mut address = cpu.registers().get16(Reg16::DE);
@@ -75,8 +74,8 @@ fn test_zexall() {
                     loop {
                         let ch = machine.peek(address) as char;
                         address += 1;
-                
-                        if ch == '$'{
+
+                        if ch == '$' {
                             break;
                         }
                         msg.push(ch);
@@ -85,13 +84,12 @@ fn test_zexall() {
                         tests_passed += 1;
                     }
                     print!("{msg}");
-                },
-                _ => panic!("BDOS command not implemented")
+                }
+                _ => panic!("BDOS command not implemented"),
             }
         }
     }
     println!("Cycles: {}", cpu.cycle_count());
-
 
     if run_single_test {
         assert_eq!(1, tests_passed);

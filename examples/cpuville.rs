@@ -1,9 +1,8 @@
-
 /*
 http://cpuville.com/Code/CPM-on-a-new-computer.html
 http://cpuville.com/Code/Tiny-BASIC.html
 */
-use std::io::{Write, stdin, stdout};
+use std::io::{stdin, stdout, Write};
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::TryRecvError;
@@ -46,9 +45,9 @@ fn main() {
                 2 => {
                     print!("{}", machine.out_value as char);
                     stdout.flush().unwrap();
-                },
-                3 => {},
-                _ => panic!("BDOS command not implemented")
+                }
+                3 => {}
+                _ => panic!("BDOS command not implemented"),
             }
             machine.out_port = None;
         }
@@ -57,15 +56,15 @@ fn main() {
             match port {
                 2 => {
                     in_char_waiting = false;
-                },
-                3 => {},
-                _ => panic!("BDOS command not implemented")
+                }
+                3 => {}
+                _ => panic!("BDOS command not implemented"),
             }
             machine.in_port = None;
 
             // Avoid 100% CPU usage waiting for input.
             if MHZ == 0.0 {
-                thread::sleep(Duration::from_millis(1));  
+                thread::sleep(Duration::from_millis(1));
             }
         }
 
@@ -76,11 +75,11 @@ fn main() {
                     machine.in_values[2] = key;
                     in_char_waiting = true;
                     machine.in_values[3] = 3; // RX Ready
-                },
+                }
                 Err(TryRecvError::Empty) => {
                     machine.in_values[3] = 1; // RX Not ready
-                },
-                Err(TryRecvError::Disconnected) => {},
+                }
+                Err(TryRecvError::Disconnected) => {}
             }
         }
     }
@@ -92,7 +91,9 @@ fn spawn_stdin_channel() -> Receiver<u8> {
         let mut buffer = String::new();
         stdin().read_line(&mut buffer).unwrap();
         for mut c in buffer.bytes() {
-            if c == 10 {c = 13};
+            if c == 10 {
+                c = 13
+            };
             tx.send(c).unwrap();
         }
     });
@@ -104,7 +105,7 @@ struct VilleMachine {
     in_values: [u8; 256],
     in_port: Option<u8>,
     out_port: Option<u8>,
-    out_value: u8
+    out_value: u8,
 }
 
 impl VilleMachine {
@@ -114,7 +115,7 @@ impl VilleMachine {
             in_values: [0; 256],
             out_port: None,
             out_value: 0,
-            in_port: None
+            in_port: None,
         }
     }
 }
@@ -143,5 +144,3 @@ impl Machine for VilleMachine {
         self.out_value = value;
     }
 }
-
-

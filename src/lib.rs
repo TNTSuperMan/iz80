@@ -1,11 +1,11 @@
 //! Z80 Emulator library that passes all ZEXALL tests
-//! 
+//!
 //! See bin/cpuville.rs or the [iz-cpm](https://github.com/ivanizag/iz-cpm)
 //! project for usage examples.
-//! 
+//!
 //!# Example
 //! To run this example, execute: `cargo run --bin simplest`
-//! 
+//!
 //! ```
 //!use iz80::*;
 //!
@@ -37,15 +37,14 @@
 //!}
 //! ```
 
-
 mod cpu;
 mod machine;
 mod registers;
 mod state;
 mod timed_runner;
 
-mod decoder_z80;
 mod decoder_8080;
+mod decoder_z80;
 mod environment;
 mod opcode;
 mod opcode_alu;

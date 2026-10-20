@@ -36,10 +36,10 @@ fn z80test() {
         machine.poke16(0x802b, single_test); // ld bc, 0 to ld bc, test
         let mut test_start = machine.peek16(0x802e);
         println!("Test table {test_start:x}");
-        test_start += single_test*2;
+        test_start += single_test * 2;
         println!("Test table {test_start:x}");
         machine.poke16(0x802e, test_start); // Move start
-        machine.poke16(test_start + 2 , 0); // NUL terminate test
+        machine.poke16(test_start + 2, 0); // NUL terminate test
     }
 
     cpu.registers().set_pc(START);
@@ -62,7 +62,7 @@ fn z80test() {
                 ch = ' ';
             } else if ch as u8 == 26 {
                 ch = ' ';
-            } 
+            }
             //print!("{}[{}]", ch, ch as u8);
             print!("{ch}");
             msg.push(ch);

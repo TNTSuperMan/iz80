@@ -1,4 +1,4 @@
-use std::{fmt, mem, io};
+use std::{fmt, io, mem};
 
 /// 8 bit registers
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -37,10 +37,9 @@ pub enum Reg8 {
     /// Low byte of SP
     SPL = 15,
     /// Pseudo register, has to be replaced by (HL)
-     _HL = 16 // Invalid
+    _HL = 16, // Invalid
 }
 const REG_COUNT8: usize = 16;
-
 
 /// 16 bit registers, composed from 8 bit registers
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -59,7 +58,7 @@ pub enum Reg16 {
     /// 16 bit register IY
     IY = Reg8::IYH as u8,
     /// 16 bit register SP
-    SP = Reg8::SPH as u8
+    SP = Reg8::SPH as u8,
 }
 
 /// Z80 flags
@@ -67,29 +66,29 @@ pub enum Reg16 {
 #[repr(u8)]
 pub enum Flag {
     /// Carry flag
-    C  = 1,
+    C = 1,
     /// Negative flag
-    N  = 2,
+    N = 2,
     /// Parity or overflow flag
-    P  = 4, // P/V
+    P = 4, // P/V
     /// Undocumented third flag
     _3 = 8,
 
     /// Half carry flag
-    H  = 16,
+    H = 16,
     /// Undocumented fifth flag
     _5 = 32,
     /// Zero flag
-    Z  = 64,
+    Z = 64,
     /// Sign flag
-    S  = 128
+    S = 128,
 }
 
 impl fmt::Display for Reg8 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Reg8::_HL => write!(f, "(__index)"),
-            _ => write!(f, "{:?}", *self)
+            _ => write!(f, "{:?}", *self),
         }
     }
 }
@@ -103,7 +102,7 @@ pub struct Registers {
     iff1: bool,
     iff2: bool,
     im: u8,
-    mode8080: bool
+    mode8080: bool,
 }
 
 impl Registers {
@@ -116,7 +115,7 @@ impl Registers {
             iff1: false,
             iff2: false,
             im: 0,
-            mode8080: false
+            mode8080: false,
         };
 
         reg.reset();
@@ -180,15 +179,14 @@ impl Registers {
     /// Returns the value of a 16 bit register
     #[inline]
     pub fn get16(&self, rr: Reg16) -> u16 {
-        self.data[rr as usize +1] as u16
-        + ((self.data[rr as usize] as u16) << 8)
+        self.data[rr as usize + 1] as u16 + ((self.data[rr as usize] as u16) << 8)
     }
 
     /// Sets the value of a 16 bit register. Changes the
     /// value of the two underlying 8 bit registers.
     #[inline]
     pub fn set16(&mut self, rr: Reg16, value: u16) {
-        self.data[rr as usize +1] = value as u8;
+        self.data[rr as usize + 1] = value as u8;
         self.data[rr as usize] = (value >> 8) as u8;
         //if self.mode8080 && rr == Reg16::AF {
         if self.mode8080 && rr == Reg16::AF {
@@ -253,7 +251,6 @@ impl Registers {
         }
     }
 
-
     pub(crate) fn update_p_flag(&mut self, reference: u8) {
         let bits = reference.count_ones();
         self.put_flag(Flag::P, bits % 2 == 0);
@@ -262,22 +259,22 @@ impl Registers {
     pub(crate) fn update_sz53_flags(&mut self, reference: u8) {
         self.update_undocumented_flags(reference);
         self.put_flag(Flag::Z, reference == 0);
-        self.put_flag(Flag::S, reference & (1<<7) != 0);
+        self.put_flag(Flag::S, reference & (1 << 7) != 0);
     }
 
     pub(crate) fn update_undocumented_flags(&mut self, reference: u8) {
         if !self.mode8080 {
             // Bits 5, and 3 are copied
-            self.put_flag(Flag::_5, reference & (1<<5) != 0);
-            self.put_flag(Flag::_3, reference & (1<<3) != 0);
+            self.put_flag(Flag::_5, reference & (1 << 5) != 0);
+            self.put_flag(Flag::_3, reference & (1 << 3) != 0);
         }
     }
 
     pub(crate) fn update_undocumented_flags_block(&mut self, reference: u8) {
         if !self.mode8080 {
             // TUZD-4.2
-            self.put_flag(Flag::_5, reference & (1<<1) != 0);
-            self.put_flag(Flag::_3, reference & (1<<3) != 0);
+            self.put_flag(Flag::_5, reference & (1 << 1) != 0);
+            self.put_flag(Flag::_3, reference & (1 << 3) != 0);
         }
     }
 
@@ -298,10 +295,23 @@ impl Registers {
 
     pub(crate) fn update_arithmetic_flags_16(&mut self, a: u32, b: u32, reference: u32, neg: bool) {
         // No ADC or SBC on the 8080
-        self.update_arithmetic_flags((a >> 8) as u16, (b >> 8) as u16, (reference >> 8) as u16, neg, true);
+        self.update_arithmetic_flags(
+            (a >> 8) as u16,
+            (b >> 8) as u16,
+            (reference >> 8) as u16,
+            neg,
+            true,
+        );
     }
 
-    pub(crate) fn update_arithmetic_flags(&mut self, a: u16, b: u16, reference: u16, neg: bool, update_carry: bool) {
+    pub(crate) fn update_arithmetic_flags(
+        &mut self,
+        a: u16,
+        b: u16,
+        reference: u16,
+        neg: bool,
+        update_carry: bool,
+    ) {
         self.update_sz53_flags(reference as u8);
 
         // TUZD-8.6
@@ -311,7 +321,7 @@ impl Registers {
             self.put_flag(Flag::C, carry_bit);
         }
 
-        let half_bit  = (xor & 0x10) != 0;
+        let half_bit = (xor & 0x10) != 0;
         self.put_flag(Flag::H, half_bit);
 
         if self.mode8080 {
@@ -348,12 +358,12 @@ impl Registers {
         // TUZD-4.3
         self.update_sz53_flags(counter);
 
-        self.put_flag(Flag::H, k>255);
+        self.put_flag(Flag::H, k > 255);
         if !self.mode8080 {
             self.update_p_flag(k as u8 & 0x07 ^ counter);
             self.put_flag(Flag::N, reference & 0x80 != 0);
         }
-        self.put_flag(Flag::C, k>255);
+        self.put_flag(Flag::C, k > 255);
     }
 
     pub(crate) fn update_bits_in_flags(&mut self, reference: u8) {
@@ -417,10 +427,10 @@ impl Registers {
             i += 1;
         }
         data[i] = self.pc as u8;
-        data[i+1] = (self.pc >> 8) as u8;
-        data[i+2] = self.iff1 as u8;
-        data[i+3] = self.iff2 as u8;
-        data[i+4] = self.im;
+        data[i + 1] = (self.pc >> 8) as u8;
+        data[i + 2] = self.iff1 as u8;
+        data[i + 3] = self.iff2 as u8;
+        data[i + 4] = self.im;
         data
     }
 
@@ -437,10 +447,10 @@ impl Registers {
             *r = data[i];
             i += 1;
         }
-        self.pc = u16::from_le_bytes([data[i], data[i+1]]);
-        self.iff1 = data[i+2] != 0;
-        self.iff2 = data[i+3] != 0;
-        self.im = data[i+4];
+        self.pc = u16::from_le_bytes([data[i], data[i + 1]]);
+        self.iff1 = data[i + 2] != 0;
+        self.iff2 = data[i + 3] != 0;
+        self.im = data[i + 4];
         Ok(())
     }
 }
@@ -452,7 +462,7 @@ mod tests {
     #[test]
     fn set_get_8bit_register() {
         let mut r = Registers::new();
-        const V:u8 = 23;
+        const V: u8 = 23;
 
         r.set8(Reg8::A, V);
         assert_eq!(V, r.get8(Reg8::A));
