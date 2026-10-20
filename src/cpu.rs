@@ -75,6 +75,7 @@ impl Cpu {
         } else if env.state.int_signaled {
             let (int_enabled, int_mode) = env.state.reg.get_interrupt_mode();
             if int_enabled && !env.state.int_just_enabled {
+                let id = env.int_device_id();
                 env.state.halted = false;
                 env.state.reg.set_interrupts(false);
                 match int_mode {
@@ -83,7 +84,12 @@ impl Cpu {
                         env.state.cycle = env.state.cycle.wrapping_add(13);
                         env.subroutine_call(IRQ_ADDRESS);
                     }
-                    2 => panic!("Interrupt mode 2 not implemented"),
+                    2 => {
+                        // TODO: サイクル数を正確にする
+                        let vec_addr = u16::from_be_bytes([env.state.reg.get8(Reg8::I), id]);
+                        let address = env.sys.peek16(vec_addr);
+                        env.subroutine_call(address);
+                    }
                     _ => panic!("Invalid interrupt mode"),
                 }
             }

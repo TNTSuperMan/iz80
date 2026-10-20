@@ -196,4 +196,8 @@ impl<'a> Environment<'_> {
     pub fn port_out(&mut self, address: u16, value: u8) {
         self.sys.port_out(address, value);
     }
+
+    pub fn int_device_id(&mut self) -> u8 {
+        self.sys.int_device_id(self.state.reg.pc())
+    }
 }

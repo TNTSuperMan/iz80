@@ -143,4 +143,8 @@ impl Machine for VilleMachine {
         self.out_port = Some(address as u8);
         self.out_value = value;
     }
+
+    fn int_device_id(&mut self, _pc: u16) -> u8 {
+        0xFF
+    }
 }

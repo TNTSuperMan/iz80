@@ -27,6 +27,8 @@ pub trait Machine {
     /// Port out, from the CPU to the device. Sets a port value on
     /// the hosting device.
     fn port_out(&mut self, address: u16, value: u8);
+
+    fn int_device_id(&mut self, pc: u16) -> u8;
 }
 
 /// A simple Machine implementation
@@ -67,6 +69,10 @@ impl Machine for PlainMachine {
     }
     fn port_out(&mut self, address: u16, value: u8) {
         self.io[address as usize] = value;
+    }
+
+    fn int_device_id(&mut self, _pc: u16) -> u8 {
+        0xFF
     }
 }
 
