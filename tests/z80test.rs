@@ -15,7 +15,7 @@ const START: u16 = 0x8000;
 #[test]
 #[ignore]
 fn z80test() {
-    let mut cpu = Cpu::new_z80();
+    let mut cpu = Cpu::new();
     let mut machine = PlainMachine::new();
 
     // Load program

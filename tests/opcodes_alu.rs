@@ -3,7 +3,7 @@ use iz80::*;
 #[test]
 fn test_cp_a() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_8080();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xfe); // CP A, 01h
     sys.poke(0x0001, 0x01);
@@ -18,7 +18,7 @@ fn test_cp_a() {
 #[test]
 fn test_cp_a_2() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_8080();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xfe); // CP A, 01h
     sys.poke(0x0001, 0x01);

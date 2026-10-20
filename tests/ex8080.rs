@@ -10,7 +10,7 @@ static CODE: &[u8] = include_bytes!("res/8080EX1.COM");
 #[ignore]
 fn test_ex8080() {
     let mut machine = PlainMachine::new();
-    let mut cpu = Cpu::new_8080();
+    let mut cpu = Cpu::new();
 
     // Load program
     let code = CODE;

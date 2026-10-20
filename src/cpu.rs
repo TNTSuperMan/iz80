@@ -1,6 +1,5 @@
 use std::io;
 
-use super::decoder_8080::Decoder8080;
 use super::decoder_z80::DecoderZ80;
 use super::environment::Environment;
 use super::machine::Machine;
@@ -17,7 +16,7 @@ const NMI_ADDRESS: u16 = 0x0066;
 pub struct Cpu {
     state: State,
     trace: bool,
-    decoder: Box<dyn Decoder + Send + Sync>,
+    decoder: DecoderZ80,
 }
 
 // Ensure that the Cpu is Send and Sync and can be used with async code
@@ -31,30 +30,13 @@ pub(crate) trait Decoder {
 }
 
 impl Cpu {
-    /// Returns a Z80 Cpu instance. Alias of `new_z80()`
-    pub fn new() -> Cpu {
-        Self::new_z80()
-    }
-
     /// Returns a Z80 Cpu instance
-    pub fn new_z80() -> Cpu {
+    pub fn new() -> Cpu {
         Cpu {
             state: State::new(),
             trace: false,
-            decoder: Box::new(DecoderZ80::new()),
+            decoder: DecoderZ80::new(),
         }
-    }
-
-    /// Returns an Intel 8080 Cpu instance
-    pub fn new_8080() -> Cpu {
-        let mut cpu = Cpu {
-            state: State::new(),
-            trace: false,
-            decoder: Box::new(Decoder8080::new()),
-        };
-
-        cpu.state.reg.set_8080();
-        cpu
     }
 }
 

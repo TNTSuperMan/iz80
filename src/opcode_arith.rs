@@ -101,23 +101,3 @@ pub fn build_daa() -> Opcode {
         // N unchanged
     })
 }
-
-pub fn build_daa8080() -> Opcode {
-    Opcode::new("DAA".to_string(), |env: &mut Environment| {
-        // See TUZD-4.7
-        let a = env.state.reg.a();
-        let hi = a >> 4;
-        let lo = a & 0xf;
-
-        let cf = env.state.reg.get_flag(Flag::C);
-        let hf = env.state.reg.get_flag(Flag::H);
-
-        let lo6 = hf || (lo > 9);
-        let hi6 = cf || (hi > 9) || (hi == 9 && lo > 9);
-        let diff = if lo6 { 6 } else { 0 } + if hi6 { 6 << 4 } else { 0 };
-
-        let new_a = operator_add(env, a, diff);
-        env.state.reg.set_a(new_a);
-        env.state.reg.put_flag(Flag::C, cf || hi6);
-    })
-}

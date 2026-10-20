@@ -5,13 +5,8 @@ use iz80::*;
 static CODE: &[u8] = include_bytes!("res/CPUTEST.COM");
 
 #[test]
-fn test_cpu_test_8080() {
-    cpu_test(Cpu::new_8080());
-}
-
-#[test]
 fn test_cpu_test_z80() {
-    cpu_test(Cpu::new_z80());
+    cpu_test(Cpu::new());
 }
 
 fn cpu_test(mut cpu: Cpu) {

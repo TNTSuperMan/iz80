@@ -5,7 +5,7 @@ const IRQ_ADDRESS: u16 = 0x0038;
 #[test]
 fn test_ei() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_z80();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xfb); // EI
     sys.poke(0x0001, 0xed); // IM 1
@@ -23,7 +23,7 @@ fn test_ei() {
 #[test]
 fn test_di() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_z80();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xf3); // DI
     sys.poke(0x0001, 0xed); // IM 1
@@ -41,7 +41,7 @@ fn test_di() {
 #[test]
 fn test_ei_on_handler() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_z80();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xfb); // EI
     sys.poke(0x0001, 0xed); // IM 1
@@ -78,7 +78,7 @@ fn test_ei_on_handler() {
 #[test]
 fn test_ei_on_handler_int_not_lowered() {
     let mut sys = PlainMachine::new();
-    let mut cpu = Cpu::new_z80();
+    let mut cpu = Cpu::new();
 
     sys.poke(0x0000, 0xfb); // EI
     sys.poke(0x0001, 0xed); // IM 1

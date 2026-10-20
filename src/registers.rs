@@ -132,13 +132,6 @@ impl Registers {
         self.set_pc(0x0000);
     }
 
-    pub(crate) fn set_8080(&mut self) {
-        self.mode8080 = true;
-        self.set16(Reg16::AF, 0xffff);
-        self.set16(Reg16::SP, 0xffff);
-        self.set_flag(Flag::N);
-    }
-
     /// Returns the value of the A register
     #[inline]
     pub fn a(&self) -> u8 {
