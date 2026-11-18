@@ -109,7 +109,7 @@ fn no_prefix_opcodes() -> [Opcode; 256] {
                 },
                 3 => match p.q {
                     0 =>  build_inc_dec_rr(RP[p.p], true), // INC rr -- 16-bit inc
-                    _ /*1*/ =>  build_inc_dec_rr(RP[p.p], false), // DEC rr -- 16-bit dec                      
+                    _ /*1*/ =>  build_inc_dec_rr(RP[p.p], false), // DEC rr -- 16-bit dec
                 },
                 4 => build_inc_r(R[p.y]), // INC r -- 8 bit inc
                 5 => build_dec_r(R[p.y]), // DEC r -- 8 bit dec
