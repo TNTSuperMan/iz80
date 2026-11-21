@@ -26,7 +26,23 @@ pub struct DecoderZ80 {
 
 impl Decoder for DecoderZ80 {
     fn decode(&self, env: &mut Environment) -> &Opcode {
-        let mut code = env.advance_pc();
+        let code = env.advance_pc();
+        self.decode_with_firstcode(env, code)
+    }
+}
+
+impl DecoderZ80 {
+    pub fn new() -> DecoderZ80 {
+        DecoderZ80 {
+            no_prefix: no_prefix_opcodes(),
+            prefix_cb: cb_prefix_opcodes(),
+            prefix_cb_indexed: cb_indexed_prefix_opcodes(),
+            prefix_ed: ed_prefix_opcodes(),
+            has_displacement: displacements(),
+        }
+    }
+    pub fn decode_with_firstcode(&self, env: &mut Environment, code: u8) -> &Opcode {
+        let mut code = code;
 
         // Process prefixes even if reapeated
         while code == 0xdd || code == 0xfd {
@@ -60,18 +76,6 @@ impl Decoder for DecoderZ80 {
                 }
                 &self.no_prefix[code as usize]
             }
-        }
-    }
-}
-
-impl DecoderZ80 {
-    pub fn new() -> DecoderZ80 {
-        DecoderZ80 {
-            no_prefix: no_prefix_opcodes(),
-            prefix_cb: cb_prefix_opcodes(),
-            prefix_cb_indexed: cb_indexed_prefix_opcodes(),
-            prefix_ed: ed_prefix_opcodes(),
-            has_displacement: displacements(),
         }
     }
 }

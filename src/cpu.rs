@@ -79,7 +79,15 @@ impl Cpu {
                 env.state.halted = false;
                 env.state.reg.set_interrupts(false);
                 match int_mode {
-                    0 => panic!("Interrupt mode 0 not implemented"),
+                    0 => {
+                        // TODO: より正確にに挙動を合わせないといけない
+                        let opcode = self.decoder.decode_with_firstcode(&mut env, id);
+                        env.clear_branch_taken();
+                        env.clear_int_just_enabled();
+                        opcode.execute(&mut env);
+                        env.advance_cycles(opcode);
+                        env.clear_index();
+                    }
                     1 => {
                         env.state.cycle = env.state.cycle.wrapping_add(13);
                         env.subroutine_call(IRQ_ADDRESS);
