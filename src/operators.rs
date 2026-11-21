@@ -102,19 +102,19 @@ pub fn operator_dec(env: &mut Environment, a: u8) -> u8 {
 
 pub fn operator_and(env: &mut Environment, a: u8, b: u8) -> u8 {
     let v = a & b;
-    env.state.reg.update_logic_flags(a, b, v, true);
+    env.state.reg.update_logic_flags(v, true);
     v
 }
 
 pub fn operator_xor(env: &mut Environment, a: u8, b: u8) -> u8 {
     let v = a ^ b;
-    env.state.reg.update_logic_flags(a, b, v, false);
+    env.state.reg.update_logic_flags(v, false);
     v
 }
 
 pub fn operator_or(env: &mut Environment, a: u8, b: u8) -> u8 {
     let v = a | b;
-    env.state.reg.update_logic_flags(a, b, v, false);
+    env.state.reg.update_logic_flags(v, false);
     v
 }
 
