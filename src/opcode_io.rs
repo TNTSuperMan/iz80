@@ -1,4 +1,5 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::opcode::Opcode;
 use super::registers::{Reg16, Reg8};
 
@@ -14,31 +15,31 @@ The INI/INIR/IND/INDR instructions use BC after decrementing B, and the OUTI/OTI
 instructions before.
 */
 
-pub fn build_out_c_r(r: Reg8) -> Opcode {
-    Opcode::new(format!("OUT (C), {r}"), move |env: &mut Environment| {
+pub fn build_out_c_r<M: Machine>(r: Reg8) -> Opcode<M> {
+    Opcode::new(format!("OUT (C), {r}"), move |env: &mut Environment<M>| {
         let address = env.state.reg.get16(Reg16::BC);
         let value = env.state.reg.get8(r);
         env.port_out(address, value);
     })
 }
 
-pub fn build_out_c_0() -> Opcode {
-    Opcode::new("OUT (C), 0".to_string(), |env: &mut Environment| {
+pub fn build_out_c_0<M: Machine>() -> Opcode<M> {
+    Opcode::new("OUT (C), 0".to_string(), |env: &mut Environment<M>| {
         let address = env.state.reg.get16(Reg16::BC);
         env.port_out(address, 0);
     })
 }
 
-pub fn build_out_n_a() -> Opcode {
-    Opcode::new("OUT (n), A".to_string(), |env: &mut Environment| {
+pub fn build_out_n_a<M: Machine>() -> Opcode<M> {
+    Opcode::new("OUT (n), A".to_string(), |env: &mut Environment<M>| {
         let a = env.state.reg.a();
         let address = u16::from_le_bytes([env.advance_pc(), a]);
         env.port_out(address, a);
     })
 }
 
-pub fn build_in_r_c(r: Reg8) -> Opcode {
-    Opcode::new(format!("IN {r}, (C)"), move |env: &mut Environment| {
+pub fn build_in_r_c<M: Machine>(r: Reg8) -> Opcode<M> {
+    Opcode::new(format!("IN {r}, (C)"), move |env: &mut Environment<M>| {
         let address = env.state.reg.get16(Reg16::BC);
         let value = env.port_in(address);
         env.state.reg.set8(r, value);
@@ -47,8 +48,8 @@ pub fn build_in_r_c(r: Reg8) -> Opcode {
     })
 }
 
-pub fn build_in_0_c() -> Opcode {
-    Opcode::new("IN (C)".to_string(), |env: &mut Environment| {
+pub fn build_in_0_c<M: Machine>() -> Opcode<M> {
+    Opcode::new("IN (C)".to_string(), |env: &mut Environment<M>| {
         let address = env.state.reg.get16(Reg16::BC);
         let value = env.port_in(address);
 
@@ -56,8 +57,8 @@ pub fn build_in_0_c() -> Opcode {
     })
 }
 
-pub fn build_in_a_n() -> Opcode {
-    Opcode::new("IN A, (n)".to_string(), |env: &mut Environment| {
+pub fn build_in_a_n<M: Machine>() -> Opcode<M> {
+    Opcode::new("IN A, (n)".to_string(), |env: &mut Environment<M>| {
         let a = env.state.reg.a();
         let address = u16::from_le_bytes([env.advance_pc(), a]);
         let value = env.port_in(address);
@@ -70,8 +71,8 @@ pub fn build_in_a_n() -> Opcode {
 instructions before.
 */
 
-pub fn build_in_block((inc, repeat, postfix): (bool, bool, &'static str)) -> Opcode {
-    Opcode::new(format!("IN{postfix}"), move |env: &mut Environment| {
+pub fn build_in_block<M: Machine>((inc, repeat, postfix): (bool, bool, &'static str)) -> Opcode<M> {
+    Opcode::new(format!("IN{postfix}"), move |env: &mut Environment<M>| {
         // The INI/INIR/IND/INDR instructions use BC after decrementing B
         let b = env.state.reg.inc_dec8(Reg8::B, false /* decrement */);
         let address = env.state.reg.get16(Reg16::BC);
@@ -95,9 +96,11 @@ pub fn build_in_block((inc, repeat, postfix): (bool, bool, &'static str)) -> Opc
     })
 }
 
-pub fn build_out_block((inc, repeat, postfix): (bool, bool, &'static str)) -> Opcode {
+pub fn build_out_block<M: Machine>(
+    (inc, repeat, postfix): (bool, bool, &'static str),
+) -> Opcode<M> {
     let n0 = if repeat { "OT" } else { "OUT" };
-    Opcode::new(format!("{n0}{postfix}"), move |env: &mut Environment| {
+    Opcode::new(format!("{n0}{postfix}"), move |env: &mut Environment<M>| {
         // the OUTI/OTIR/OUTD/OTDR instructions use BC before decrementing B
         let address = env.state.reg.get16(Reg16::BC);
         let b = env.state.reg.inc_dec8(Reg8::B, false /* decrement */);

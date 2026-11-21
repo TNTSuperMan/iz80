@@ -1,4 +1,5 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::opcode::Opcode;
 use super::registers::{Flag, Reg8};
 
@@ -16,12 +17,12 @@ pub enum ShiftDir {
     Right,
 }
 
-pub fn build_rot_r(
+pub fn build_rot_r<M: Machine>(
     r: Reg8,
     (dir, mode, name): (ShiftDir, ShiftMode, &str),
     fast: bool,
     indexed: bool,
-) -> Opcode {
+) -> Opcode<M> {
     let full_name = if indexed {
         format!("LD {r}, {name} {}", Reg8::_HL)
     } else {
@@ -29,7 +30,7 @@ pub fn build_rot_r(
         format!("{name}{separator}{r}")
     };
 
-    Opcode::new(full_name, move |env: &mut Environment| {
+    Opcode::new(full_name, move |env: &mut Environment<M>| {
         let mut v = if indexed {
             env.reg8_ext(Reg8::_HL)
         } else {
@@ -84,8 +85,8 @@ pub fn build_rot_r(
     })
 }
 
-pub fn build_bit_r(n: u8, r: Reg8) -> Opcode {
-    Opcode::new(format!("BIT {n}, {r}"), move |env: &mut Environment| {
+pub fn build_bit_r<M: Machine>(n: u8, r: Reg8) -> Opcode<M> {
+    Opcode::new(format!("BIT {n}, {r}"), move |env: &mut Environment<M>| {
         let v = env.reg8_ext(r);
         let z = v & (1 << n);
         env.state.reg.put_flag(Flag::S, (z & 0x80) != 0);
@@ -119,11 +120,11 @@ pub fn build_bit_r(n: u8, r: Reg8) -> Opcode {
     })
 }
 
-pub fn build_set_res_r(bit: u8, r: Reg8, value: bool) -> Opcode {
+pub fn build_set_res_r<M: Machine>(bit: u8, r: Reg8, value: bool) -> Opcode<M> {
     let name = if value { "SET" } else { "RES" };
     Opcode::new(
         format!("{name} {bit}, {r}"),
-        move |env: &mut Environment| {
+        move |env: &mut Environment<M>| {
             let mut v = env.reg8_ext(r);
             if value {
                 v |= 1 << bit;
@@ -136,11 +137,11 @@ pub fn build_set_res_r(bit: u8, r: Reg8, value: bool) -> Opcode {
     )
 }
 
-pub fn build_indexed_set_res_r(bit: u8, r: Reg8, value: bool) -> Opcode {
+pub fn build_indexed_set_res_r<M: Machine>(bit: u8, r: Reg8, value: bool) -> Opcode<M> {
     let name = if value { "SET" } else { "RES" };
     Opcode::new(
         format!("LD {}, {} {}, {}", r, name, bit, Reg8::_HL),
-        move |env: &mut Environment| {
+        move |env: &mut Environment<M>| {
             /*
             An instruction such as LD r, RES b, (IX+d) should be interpreted as
             "attempt to reset bit b of the byte at (IX+d), and copy the result
@@ -161,8 +162,8 @@ pub fn build_indexed_set_res_r(bit: u8, r: Reg8, value: bool) -> Opcode {
     )
 }
 
-pub fn build_cpl() -> Opcode {
-    Opcode::new("CPL".to_string(), |env: &mut Environment| {
+pub fn build_cpl<M: Machine>() -> Opcode<M> {
+    Opcode::new("CPL".to_string(), |env: &mut Environment<M>| {
         let mut v = env.state.reg.a();
         v = !v;
         env.state.reg.set_a(v);
@@ -172,8 +173,8 @@ pub fn build_cpl() -> Opcode {
     })
 }
 
-pub fn build_scf() -> Opcode {
-    Opcode::new("SCF".to_string(), |env: &mut Environment| {
+pub fn build_scf<M: Machine>() -> Opcode<M> {
+    Opcode::new("SCF".to_string(), |env: &mut Environment<M>| {
         let a = env.state.reg.a();
 
         env.state.reg.set_flag(Flag::C);
@@ -182,8 +183,8 @@ pub fn build_scf() -> Opcode {
     })
 }
 
-pub fn build_ccf() -> Opcode {
-    Opcode::new("CCF".to_string(), |env: &mut Environment| {
+pub fn build_ccf<M: Machine>() -> Opcode<M> {
+    Opcode::new("CCF".to_string(), |env: &mut Environment<M>| {
         let a = env.state.reg.a();
         let c = env.state.reg.get_flag(Flag::C);
 
@@ -193,8 +194,8 @@ pub fn build_ccf() -> Opcode {
     })
 }
 
-pub fn build_rxd(dir: ShiftDir, name: &str) -> Opcode {
-    Opcode::new(name.to_string(), move |env: &mut Environment| {
+pub fn build_rxd<M: Machine>(dir: ShiftDir, name: &str) -> Opcode<M> {
+    Opcode::new(name.to_string(), move |env: &mut Environment<M>| {
         let mut a = env.state.reg.a();
         let mut phl = env.reg8_ext(Reg8::_HL);
         // a = 0xWX, phl = 0xYZ

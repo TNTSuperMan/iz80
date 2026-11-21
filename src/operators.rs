@@ -1,14 +1,40 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::registers::Flag;
 
-pub type Operator = fn(&mut Environment, u8, u8) -> u8;
+#[derive(Copy, Clone)]
+pub enum Operator {
+    Add,
+    Adc,
+    Sub,
+    Sbc,
+    And,
+    Xor,
+    Or,
+    Cp,
+}
 
-pub fn operator_add(env: &mut Environment, a: u8, b: u8) -> u8 {
+impl Operator {
+    pub fn apply<M: Machine>(self, env: &mut Environment<M>, a: u8, b: u8) -> u8 {
+        match self {
+            Self::Add => operator_add(env, a, b),
+            Self::Adc => operator_adc(env, a, b),
+            Self::Sub => operator_sub(env, a, b),
+            Self::Sbc => operator_sbc(env, a, b),
+            Self::And => operator_and(env, a, b),
+            Self::Xor => operator_xor(env, a, b),
+            Self::Or => operator_or(env, a, b),
+            Self::Cp => operator_cp(env, a, b),
+        }
+    }
+}
+
+pub fn operator_add<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     env.state.reg.clear_flag(Flag::C);
     operator_adc(env, a, b)
 }
 
-pub fn operator_adc(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_adc<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     let aa = a as u16;
     let bb = b as u16;
     let mut vv = aa + bb;
@@ -21,7 +47,7 @@ pub fn operator_adc(env: &mut Environment, a: u8, b: u8) -> u8 {
     vv as u8
 }
 
-pub fn operator_add16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
+pub fn operator_add16<M: Machine>(env: &mut Environment<M>, aa: u16, bb: u16) -> u16 {
     let aaaa = aa as u32;
     let bbbb = bb as u32;
     let vvvv = aaaa + bbbb;
@@ -30,7 +56,7 @@ pub fn operator_add16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
     vvvv as u16
 }
 
-pub fn operator_adc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
+pub fn operator_adc16<M: Machine>(env: &mut Environment<M>, aa: u16, bb: u16) -> u16 {
     let aaaa = aa as u32;
     let bbbb = bb as u32;
     let mut vvvv = aaaa.wrapping_add(bbbb);
@@ -47,7 +73,7 @@ pub fn operator_adc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
     vv
 }
 
-pub fn operator_sbc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
+pub fn operator_sbc16<M: Machine>(env: &mut Environment<M>, aa: u16, bb: u16) -> u16 {
     let aaaa = aa as u32;
     let bbbb = bb as u32;
     let mut vvvv = aaaa.wrapping_sub(bbbb);
@@ -64,7 +90,7 @@ pub fn operator_sbc16(env: &mut Environment, aa: u16, bb: u16) -> u16 {
     vv
 }
 
-pub fn operator_inc(env: &mut Environment, a: u8) -> u8 {
+pub fn operator_inc<M: Machine>(env: &mut Environment<M>, a: u8) -> u8 {
     let aa = a as u16;
     let vv = aa + 1;
     env.state
@@ -73,12 +99,12 @@ pub fn operator_inc(env: &mut Environment, a: u8) -> u8 {
     vv as u8
 }
 
-pub fn operator_sub(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_sub<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     env.state.reg.clear_flag(Flag::C);
     operator_sbc(env, a, b)
 }
 
-pub fn operator_sbc(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_sbc<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     let aa = a as u16;
     let bb = b as u16;
     let mut vv = aa.wrapping_sub(bb);
@@ -91,7 +117,7 @@ pub fn operator_sbc(env: &mut Environment, a: u8, b: u8) -> u8 {
     vv as u8
 }
 
-pub fn operator_dec(env: &mut Environment, a: u8) -> u8 {
+pub fn operator_dec<M: Machine>(env: &mut Environment<M>, a: u8) -> u8 {
     let aa = a as u16;
     let vv = aa.wrapping_sub(1);
     env.state
@@ -100,25 +126,25 @@ pub fn operator_dec(env: &mut Environment, a: u8) -> u8 {
     vv as u8
 }
 
-pub fn operator_and(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_and<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     let v = a & b;
     env.state.reg.update_logic_flags(v, true);
     v
 }
 
-pub fn operator_xor(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_xor<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     let v = a ^ b;
     env.state.reg.update_logic_flags(v, false);
     v
 }
 
-pub fn operator_or(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_or<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     let v = a | b;
     env.state.reg.update_logic_flags(v, false);
     v
 }
 
-pub fn operator_cp(env: &mut Environment, a: u8, b: u8) -> u8 {
+pub fn operator_cp<M: Machine>(env: &mut Environment<M>, a: u8, b: u8) -> u8 {
     env.state.reg.clear_flag(Flag::C);
     operator_sub(env, a, b);
 

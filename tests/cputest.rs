@@ -9,7 +9,7 @@ fn test_cpu_test_z80() {
     cpu_test(Cpu::new());
 }
 
-fn cpu_test(mut cpu: Cpu) {
+fn cpu_test(mut cpu: Cpu<PlainMachine>) {
     let mut machine = PlainMachine::new();
 
     // Load program

@@ -28,7 +28,7 @@ impl Default for TimedRunner {
 
 impl TimedRunner {
     /// Define a new CPU speed in `MHz`
-    pub fn set_mhz(&mut self, cpu: &Cpu, mhz: f64, quantum_cycles: u64) {
+    pub fn set_mhz<M: Machine>(&mut self, cpu: &Cpu<M>, mhz: f64, quantum_cycles: u64) {
         self.mhz = mhz;
         self.quantum_cycles = quantum_cycles;
 
@@ -38,7 +38,7 @@ impl TimedRunner {
     }
 
     /// Executes a single instruction, waiting if needed to emulate real CPU speed.
-    pub fn execute(&mut self, cpu: &mut Cpu, sys: &mut dyn Machine) {
+    pub fn execute<M: Machine>(&mut self, cpu: &mut Cpu<M>, sys: &mut M) {
         if cpu.is_halted() {
             // The CPU is in HALT state. Only interrupts can execute.
             return;

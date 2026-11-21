@@ -3,13 +3,13 @@ use super::opcode::Opcode;
 use super::registers::{Reg16, Reg8};
 use super::state::State;
 
-pub struct Environment<'a> {
+pub struct Environment<'a, M: Machine> {
     pub state: &'a mut State,
-    pub sys: &'a mut dyn Machine,
+    pub sys: &'a mut M,
 }
 
-impl<'a> Environment<'_> {
-    pub fn new(state: &'a mut State, sys: &'a mut dyn Machine) -> Environment<'a> {
+impl<'a, M: Machine> Environment<'_, M> {
+    pub fn new(state: &'a mut State, sys: &'a mut M) -> Environment<'a, M> {
         Environment { state, sys }
     }
 
@@ -91,7 +91,7 @@ impl<'a> Environment<'_> {
         self.state.branch_taken = true;
     }
 
-    pub fn advance_cycles(&mut self, opcode: &Opcode) {
+    pub fn advance_cycles(&mut self, opcode: &Opcode<M>) {
         let cycles = if self.state.branch_taken {
             opcode.cycles
         } else {

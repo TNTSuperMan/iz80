@@ -1,40 +1,41 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::opcode::Opcode;
 use super::operators::{operator_cp, Operator};
 use super::registers::{Flag, Reg16, Reg8};
 
-pub fn build_operator_a_r(r: Reg8, (op, name): (Operator, &str)) -> Opcode {
+pub fn build_operator_a_r<M: Machine>(r: Reg8, (op, name): (Operator, &str)) -> Opcode<M> {
     if r != Reg8::_HL && r != Reg8::H && r != Reg8::L {
         // Fast version
-        Opcode::new(format!("{name} A, {r}"), move |env: &mut Environment| {
+        Opcode::new(format!("{name} A, {r}"), move |env: &mut Environment<M>| {
             let a = env.state.reg.a();
             let b = env.state.reg.get8(r);
-            let v = op(env, a, b);
+            let v = op.apply(env, a, b);
             env.state.reg.set_a(v);
         })
     } else {
-        Opcode::new(format!("{name} A, {r}"), move |env: &mut Environment| {
+        Opcode::new(format!("{name} A, {r}"), move |env: &mut Environment<M>| {
             let a = env.state.reg.a();
             let b = env.reg8_ext(r);
-            let v = op(env, a, b);
+            let v = op.apply(env, a, b);
 
             env.state.reg.set_a(v);
         })
     }
 }
 
-pub fn build_operator_a_n((op, name): (Operator, &str)) -> Opcode {
-    Opcode::new(format!("{name} A, n"), move |env: &mut Environment| {
+pub fn build_operator_a_n<M: Machine>((op, name): (Operator, &str)) -> Opcode<M> {
+    Opcode::new(format!("{name} A, n"), move |env: &mut Environment<M>| {
         let a = env.state.reg.a();
         let b = env.advance_pc();
-        let v = op(env, a, b);
+        let v = op.apply(env, a, b);
 
         env.state.reg.set_a(v);
     })
 }
 
-pub fn build_cp_block((inc, repeat, postfix): (bool, bool, &'static str)) -> Opcode {
-    Opcode::new(format!("CP{postfix}"), move |env: &mut Environment| {
+pub fn build_cp_block<M: Machine>((inc, repeat, postfix): (bool, bool, &'static str)) -> Opcode<M> {
+    Opcode::new(format!("CP{postfix}"), move |env: &mut Environment<M>| {
         let a = env.state.reg.a();
         let b = env.reg8_ext(Reg8::_HL);
         let c_bak = env.state.reg.get_flag(Flag::C);

@@ -1,59 +1,69 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::opcode::Opcode;
 use super::operators::*;
 use super::registers::{Flag, Reg16, Reg8};
 
 // 16 bit ADD opcodes
-pub fn build_add_hl_rr(rr: Reg16) -> Opcode {
-    Opcode::new(format!("ADD HL, {rr:?}"), move |env: &mut Environment| {
-        let aa = env.index_value();
-        let bb = env.reg16_ext(rr);
-        let vv = operator_add16(env, aa, bb);
-        env.set_reg16(Reg16::HL, vv);
-    })
+pub fn build_add_hl_rr<M: Machine>(rr: Reg16) -> Opcode<M> {
+    Opcode::new(
+        format!("ADD HL, {rr:?}"),
+        move |env: &mut Environment<M>| {
+            let aa = env.index_value();
+            let bb = env.reg16_ext(rr);
+            let vv = operator_add16(env, aa, bb);
+            env.set_reg16(Reg16::HL, vv);
+        },
+    )
 }
 
-pub fn build_adc_hl_rr(rr: Reg16) -> Opcode {
-    Opcode::new(format!("ADC HL, {rr:?}"), move |env: &mut Environment| {
-        let aa = env.index_value(); // This will always be HL.
-        let bb = env.reg16_ext(rr);
-        let vv = operator_adc16(env, aa, bb);
-        env.state.reg.set16(Reg16::HL, vv);
-    })
+pub fn build_adc_hl_rr<M: Machine>(rr: Reg16) -> Opcode<M> {
+    Opcode::new(
+        format!("ADC HL, {rr:?}"),
+        move |env: &mut Environment<M>| {
+            let aa = env.index_value(); // This will always be HL.
+            let bb = env.reg16_ext(rr);
+            let vv = operator_adc16(env, aa, bb);
+            env.state.reg.set16(Reg16::HL, vv);
+        },
+    )
 }
 
-pub fn build_sbc_hl_rr(rr: Reg16) -> Opcode {
-    Opcode::new(format!("SBC HL, {rr:?}"), move |env: &mut Environment| {
-        let aa = env.index_value(); // This will always be HL.
-        let bb = env.reg16_ext(rr);
-        let vv = operator_sbc16(env, aa, bb);
-        env.state.reg.set16(Reg16::HL, vv);
-    })
+pub fn build_sbc_hl_rr<M: Machine>(rr: Reg16) -> Opcode<M> {
+    Opcode::new(
+        format!("SBC HL, {rr:?}"),
+        move |env: &mut Environment<M>| {
+            let aa = env.index_value(); // This will always be HL.
+            let bb = env.reg16_ext(rr);
+            let vv = operator_sbc16(env, aa, bb);
+            env.state.reg.set16(Reg16::HL, vv);
+        },
+    )
 }
 
 // INC, DEC opcodes
-pub fn build_inc_r(r: Reg8) -> Opcode {
-    Opcode::new(format!("INC {r}"), move |env: &mut Environment| {
+pub fn build_inc_r<M: Machine>(r: Reg8) -> Opcode<M> {
+    Opcode::new(format!("INC {r}"), move |env: &mut Environment<M>| {
         let a = env.reg8_ext(r);
         let v = operator_inc(env, a);
         env.set_reg(r, v);
     })
 }
 
-pub fn build_dec_r(r: Reg8) -> Opcode {
-    Opcode::new(format!("DEC {r}"), move |env: &mut Environment| {
+pub fn build_dec_r<M: Machine>(r: Reg8) -> Opcode<M> {
+    Opcode::new(format!("DEC {r}"), move |env: &mut Environment<M>| {
         let a = env.reg8_ext(r);
         let v = operator_dec(env, a);
         env.set_reg(r, v);
     })
 }
 
-pub fn build_inc_dec_rr(rr: Reg16, inc: bool) -> Opcode {
+pub fn build_inc_dec_rr<M: Machine>(rr: Reg16, inc: bool) -> Opcode<M> {
     let delta = if inc { 1 } else { -1_i16 as u16 };
     let mnemonic = if inc { "INC" } else { "DEC" };
     Opcode::new(
         format!("{mnemonic} {rr:?}"),
-        move |env: &mut Environment| {
+        move |env: &mut Environment<M>| {
             let mut v = env.reg16_ext(rr);
             v = v.wrapping_add(delta);
             env.set_reg16(rr, v);
@@ -63,16 +73,16 @@ pub fn build_inc_dec_rr(rr: Reg16, inc: bool) -> Opcode {
 }
 
 // Misc. opcodes
-pub fn build_neg() -> Opcode {
-    Opcode::new("NEG".to_string(), |env: &mut Environment| {
+pub fn build_neg<M: Machine>() -> Opcode<M> {
+    Opcode::new("NEG".to_string(), |env: &mut Environment<M>| {
         let b = env.state.reg.a();
         let v = operator_sub(env, 0, b);
         env.state.reg.set_a(v);
     })
 }
 
-pub fn build_daa() -> Opcode {
-    Opcode::new("DAA".to_string(), |env: &mut Environment| {
+pub fn build_daa<M: Machine>() -> Opcode<M> {
+    Opcode::new("DAA".to_string(), |env: &mut Environment<M>| {
         // See TUZD-4.7
         let a = env.state.reg.a();
         let hi = a >> 4;

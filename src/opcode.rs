@@ -1,19 +1,20 @@
 use super::environment::Environment;
+use super::machine::Machine;
 use super::registers::Reg16;
 
-type OpcodeFn = dyn Fn(&mut Environment) + Send + Sync;
+type OpcodeFn<M> = dyn for<'a> Fn(&mut Environment<'a, M>) + Send + Sync;
 
-pub struct Opcode {
+pub struct Opcode<M: Machine> {
     pub name: String,
     pub cycles: u8,
     pub cycles_conditional: u8,
-    pub action: Box<OpcodeFn>,
+    pub action: Box<OpcodeFn<M>>,
 }
 
-impl Opcode {
-    pub(crate) fn new<T>(name: String, action: T) -> Opcode
+impl<M: Machine> Opcode<M> {
+    pub(crate) fn new<T>(name: String, action: T) -> Opcode<M>
     where
-        T: Fn(&mut Environment) + Send + Sync + 'static,
+        T: for<'a> Fn(&mut Environment<'a, M>) + Send + Sync + 'static,
     {
         Opcode {
             name,
@@ -23,11 +24,11 @@ impl Opcode {
         }
     }
 
-    pub fn execute(&self, env: &mut Environment) {
+    pub fn execute(&self, env: &mut Environment<M>) {
         (self.action)(env);
     }
 
-    pub fn disasm(&self, env: &mut Environment) -> String {
+    pub fn disasm(&self, env: &mut Environment<M>) -> String {
         let name = if self.name.contains("__index") {
             self.name.replace("__index", &env.index_description())
         } else {
@@ -56,59 +57,59 @@ impl Opcode {
     }
 }
 
-pub fn build_not_an_opcode() -> Opcode {
-    Opcode::new("NOT_AN_OPCODE".to_string(), |_: &mut Environment| {
+pub fn build_not_an_opcode<M: Machine>() -> Opcode<M> {
+    Opcode::new("NOT_AN_OPCODE".to_string(), |_: &mut Environment<M>| {
         panic!("Not an opcode")
     })
 }
 
-pub fn build_nop() -> Opcode {
-    Opcode::new("NOP".to_string(), |_: &mut Environment| {
+pub fn build_nop<M: Machine>() -> Opcode<M> {
+    Opcode::new("NOP".to_string(), |_: &mut Environment<M>| {
         // Nothing done
     })
 }
 
-pub fn build_noni_nop() -> Opcode {
-    Opcode::new("NONINOP".to_string(), |_: &mut Environment| {
+pub fn build_noni_nop<M: Machine>() -> Opcode<M> {
+    Opcode::new("NONINOP".to_string(), |_: &mut Environment<M>| {
         // Nothing done
     })
 }
 
-pub fn build_halt() -> Opcode {
-    Opcode::new("HALT".to_string(), |env: &mut Environment| {
+pub fn build_halt<M: Machine>() -> Opcode<M> {
+    Opcode::new("HALT".to_string(), |env: &mut Environment<M>| {
         env.state.halted = true;
     })
 }
 
-pub fn build_pop_rr(rr: Reg16) -> Opcode {
-    Opcode::new(format!("POP {rr:?}"), move |env: &mut Environment| {
+pub fn build_pop_rr<M: Machine>(rr: Reg16) -> Opcode<M> {
+    Opcode::new(format!("POP {rr:?}"), move |env: &mut Environment<M>| {
         let value = env.pop();
         env.set_reg16(rr, value);
     })
 }
 
-pub fn build_push_rr(rr: Reg16) -> Opcode {
-    Opcode::new(format!("PUSH {rr:?}"), move |env: &mut Environment| {
+pub fn build_push_rr<M: Machine>(rr: Reg16) -> Opcode<M> {
+    Opcode::new(format!("PUSH {rr:?}"), move |env: &mut Environment<M>| {
         let value = env.reg16_ext(rr);
         env.push(value);
     })
 }
 
-pub fn build_disable_interrupts() -> Opcode {
-    Opcode::new("DI".to_string(), |env: &mut Environment| {
+pub fn build_disable_interrupts<M: Machine>() -> Opcode<M> {
+    Opcode::new("DI".to_string(), |env: &mut Environment<M>| {
         env.state.reg.set_interrupts(false);
     })
 }
 
-pub fn build_enable_interrupts() -> Opcode {
-    Opcode::new("EI".to_string(), |env: &mut Environment| {
+pub fn build_enable_interrupts<M: Machine>() -> Opcode<M> {
+    Opcode::new("EI".to_string(), |env: &mut Environment<M>| {
         env.state.reg.set_interrupts(true);
         env.state.int_just_enabled = true;
     })
 }
 
-pub fn build_im(im: u8) -> Opcode {
-    Opcode::new(format!("IM {im}"), move |env: &mut Environment| {
+pub fn build_im<M: Machine>(im: u8) -> Opcode<M> {
+    Opcode::new(format!("IM {im}"), move |env: &mut Environment<M>| {
         env.state.reg.set_interrupt_mode(im);
     })
 }

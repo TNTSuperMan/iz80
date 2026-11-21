@@ -13,24 +13,24 @@ const NMI_ADDRESS: u16 = 0x0066;
 /// The Z80 cpu emulator.
 ///
 /// Executes Z80 instructions changing the cpu State and Machine
-pub struct Cpu {
+pub struct Cpu<M: Machine> {
     state: State,
-    decoder: DecoderZ80,
+    decoder: DecoderZ80<M>,
 }
 
 // Ensure that the Cpu is Send and Sync and can be used with async code
 const _: () = {
     fn assert_send<T: Send + Sync>() {}
-    let _ = assert_send::<Cpu>;
+    let _ = assert_send::<Cpu<super::machine::PlainMachine>>;
 };
 
-pub(crate) trait Decoder {
-    fn decode(&self, env: &mut Environment) -> &Opcode;
+pub(crate) trait Decoder<M: Machine> {
+    fn decode(&self, env: &mut Environment<M>) -> &Opcode<M>;
 }
 
-impl Cpu {
+impl<M: Machine> Cpu<M> {
     /// Returns a Z80 Cpu instance
-    pub fn new() -> Cpu {
+    pub fn new() -> Cpu<M> {
         Cpu {
             state: State::new(),
             decoder: DecoderZ80::new(),
@@ -38,20 +38,20 @@ impl Cpu {
     }
 }
 
-impl Default for Cpu {
+impl<M: Machine> Default for Cpu<M> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Cpu {
+impl<M: Machine> Cpu<M> {
     /// Executes a single instruction
     ///
     /// # Arguments
     ///
     /// * `sys` - A representation of the emulated machine that has the Machine trait
     ///
-    pub fn execute_instruction(&mut self, sys: &mut dyn Machine) {
+    pub fn execute_instruction(&mut self, sys: &mut M) {
         if self.is_halted() {
             // The CPU is in HALT state. Only interrupts can execute.
             return;
@@ -116,7 +116,7 @@ impl Cpu {
     ///
     /// * `sys` - A representation of the emulated machine that has the Machine trait
     ///
-    pub fn disasm_instruction(&mut self, sys: &mut dyn Machine) -> String {
+    pub fn disasm_instruction(&mut self, sys: &mut M) -> String {
         let mut env = Environment::new(&mut self.state, sys);
         let opcode = self.decoder.decode(&mut env);
         opcode.disasm(&mut env)
@@ -162,7 +162,7 @@ impl Cpu {
     }
 }
 
-impl Serialize for Cpu {
+impl<M: Machine> Serialize for Cpu<M> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -171,7 +171,7 @@ impl Serialize for Cpu {
     }
 }
 
-impl<'de> Deserialize<'de> for Cpu {
+impl<'de, M: Machine> Deserialize<'de> for Cpu<M> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,

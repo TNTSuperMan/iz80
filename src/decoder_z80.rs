@@ -1,5 +1,6 @@
 use super::cpu::*;
 use super::environment::*;
+use super::machine::Machine;
 use super::opcode::*;
 use super::opcode_alu::*;
 use super::opcode_arith::*;
@@ -16,23 +17,23 @@ use super::registers::*;
     http://z80-heaven.wikidot.com/instructions-set
 */
 
-pub struct DecoderZ80 {
-    no_prefix: [Opcode; 256],
-    prefix_cb: [Opcode; 256],
-    prefix_cb_indexed: [Opcode; 256],
-    prefix_ed: [Opcode; 256],
+pub struct DecoderZ80<M: Machine> {
+    no_prefix: [Opcode<M>; 256],
+    prefix_cb: [Opcode<M>; 256],
+    prefix_cb_indexed: [Opcode<M>; 256],
+    prefix_ed: [Opcode<M>; 256],
     has_displacement: [bool; 256],
 }
 
-impl Decoder for DecoderZ80 {
-    fn decode(&self, env: &mut Environment) -> &Opcode {
+impl<M: Machine> Decoder<M> for DecoderZ80<M> {
+    fn decode(&self, env: &mut Environment<M>) -> &Opcode<M> {
         let code = env.advance_pc();
         self.decode_with_firstcode(env, code)
     }
 }
 
-impl DecoderZ80 {
-    pub fn new() -> DecoderZ80 {
+impl<M: Machine> DecoderZ80<M> {
+    pub fn new() -> DecoderZ80<M> {
         DecoderZ80 {
             no_prefix: no_prefix_opcodes(),
             prefix_cb: cb_prefix_opcodes(),
@@ -41,7 +42,7 @@ impl DecoderZ80 {
             has_displacement: displacements(),
         }
     }
-    pub fn decode_with_firstcode(&self, env: &mut Environment, code: u8) -> &Opcode {
+    pub fn decode_with_firstcode(&self, env: &mut Environment<M>, code: u8) -> &Opcode<M> {
         let mut code = code;
 
         // Process prefixes even if reapeated
@@ -80,7 +81,7 @@ impl DecoderZ80 {
     }
 }
 
-fn no_prefix_opcodes() -> [Opcode; 256] {
+fn no_prefix_opcodes<M: Machine>() -> [Opcode<M>; 256] {
     let mut opcodes_vector = Vec::with_capacity(256);
     for c in 0..=255 {
         let p = DecodingHelper::parts(c);
@@ -179,7 +180,7 @@ fn no_prefix_opcodes() -> [Opcode; 256] {
     opcodes
 }
 
-fn cb_prefix_opcodes() -> [Opcode; 256] {
+fn cb_prefix_opcodes<M: Machine>() -> [Opcode<M>; 256] {
     let mut opcodes_vector = Vec::with_capacity(256);
 
     for c in 0..=255 {
@@ -200,7 +201,7 @@ fn cb_prefix_opcodes() -> [Opcode; 256] {
         .unwrap_or_else(|_| panic!("missing opcodes"))
 }
 
-fn cb_indexed_prefix_opcodes() -> [Opcode; 256] {
+fn cb_indexed_prefix_opcodes<M: Machine>() -> [Opcode<M>; 256] {
     let mut opcodes_vector = Vec::with_capacity(256);
 
     for c in 0..=255 {
@@ -222,7 +223,7 @@ fn cb_indexed_prefix_opcodes() -> [Opcode; 256] {
         .unwrap_or_else(|_| panic!("missing opcodes"))
 }
 
-fn ed_prefix_opcodes() -> [Opcode; 256] {
+fn ed_prefix_opcodes<M: Machine>() -> [Opcode<M>; 256] {
     let mut opcodes_vector = Vec::with_capacity(256);
 
     for c in 0..=255 {
@@ -317,7 +318,7 @@ fn displacements() -> [bool; 256] {
     disps
 }
 
-fn load_cycle_information_no_prefix(opcodes: &mut [Opcode; 256]) {
+fn load_cycle_information_no_prefix<M: Machine>(opcodes: &mut [Opcode<M>; 256]) {
     opcodes[0x10].cycles_conditional = 8;
     opcodes[0x20].cycles_conditional = 8;
     opcodes[0x28].cycles_conditional = 8;
@@ -353,7 +354,7 @@ fn load_cycle_information_no_prefix(opcodes: &mut [Opcode; 256]) {
     opcodes[0xfc].cycles_conditional = 10;
 }
 
-fn load_cycle_information_prefix_ed(opcodes: &mut [Opcode; 256]) {
+fn load_cycle_information_prefix_ed<M: Machine>(opcodes: &mut [Opcode<M>; 256]) {
     opcodes[0xb0].cycles_conditional = 16;
     opcodes[0xb1].cycles_conditional = 16;
     opcodes[0xb2].cycles_conditional = 16;
@@ -422,14 +423,14 @@ const ROT: [(ShiftDir, ShiftMode, &str); 8] = [
 ];
 
 const ALU: [(Operator, &str); 8] = [
-    (operator_add, "ADD"),
-    (operator_adc, "ADC"),
-    (operator_sub, "SUB"),
-    (operator_sbc, "SBC"),
-    (operator_and, "AND"),
-    (operator_xor, "XOR"),
-    (operator_or, "OR"),
-    (operator_cp, "CP"),
+    (Operator::Add, "ADD"),
+    (Operator::Adc, "ADC"),
+    (Operator::Sub, "SUB"),
+    (Operator::Sbc, "SBC"),
+    (Operator::And, "AND"),
+    (Operator::Xor, "XOR"),
+    (Operator::Or, "OR"),
+    (Operator::Cp, "CP"),
 ];
 
 const BLI_A: [(bool, bool, &str); 4] = [
