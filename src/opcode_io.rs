@@ -32,7 +32,7 @@ pub fn build_out_c_0() -> Opcode {
 pub fn build_out_n_a() -> Opcode {
     Opcode::new("OUT (n), A".to_string(), |env: &mut Environment| {
         let a = env.state.reg.a();
-        let address = ((a as u16) << 8) + env.advance_pc() as u16;
+        let address = u16::from_le_bytes([env.advance_pc(), a]);
         env.port_out(address, a);
     })
 }
@@ -59,7 +59,7 @@ pub fn build_in_0_c() -> Opcode {
 pub fn build_in_a_n() -> Opcode {
     Opcode::new("IN A, (n)".to_string(), |env: &mut Environment| {
         let a = env.state.reg.a();
-        let address = ((a as u16) << 8) + env.advance_pc() as u16;
+        let address = u16::from_le_bytes([env.advance_pc(), a]);
         let value = env.port_in(address);
         env.state.reg.set_a(value);
     })

@@ -94,7 +94,7 @@ impl Cpu {
                     }
                     2 => {
                         // TODO: サイクル数を正確にする
-                        let vec_addr = u16::from_be_bytes([env.state.reg.get8(Reg8::I), id]);
+                        let vec_addr = u16::from_le_bytes([id, env.state.reg.get8(Reg8::I)]);
                         let address = env.sys.peek16(vec_addr);
                         env.subroutine_call(address);
                     }

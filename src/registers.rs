@@ -174,15 +174,16 @@ impl Registers {
     /// Returns the value of a 16 bit register
     #[inline]
     pub fn get16(&self, rr: Reg16) -> u16 {
-        self.data[rr as usize + 1] as u16 + ((self.data[rr as usize] as u16) << 8)
+        u16::from_be_bytes([self.data[rr as usize], self.data[rr as usize + 1]])
     }
 
     /// Sets the value of a 16 bit register. Changes the
     /// value of the two underlying 8 bit registers.
     #[inline]
     pub fn set16(&mut self, rr: Reg16, value: u16) {
-        self.data[rr as usize + 1] = value as u8;
-        self.data[rr as usize] = (value >> 8) as u8;
+        let [hi, lo] = value.to_be_bytes();
+        self.data[rr as usize] = hi;
+        self.data[rr as usize + 1] = lo;
         //if self.mode8080 && rr == Reg16::AF {
         if self.mode8080 && rr == Reg16::AF {
             // Ensure non existent flags have proper values

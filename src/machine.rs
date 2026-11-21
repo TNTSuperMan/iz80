@@ -12,13 +12,14 @@ pub trait Machine {
 
     /// Returns the memory contents in [address] as word
     fn peek16(&mut self, address: u16) -> u16 {
-        self.peek(address) as u16 + ((self.peek(address.wrapping_add(1)) as u16) << 8)
+        u16::from_le_bytes([self.peek(address), self.peek(address.wrapping_add(1))])
     }
 
     /// Sets the memory content to the word [value] in [address]
     fn poke16(&mut self, address: u16, value: u16) {
-        self.poke(address, value as u8);
-        self.poke(address.wrapping_add(1), (value >> 8) as u8);
+        let [low, hi] = value.to_le_bytes();
+        self.poke(address, low);
+        self.poke(address.wrapping_add(1), hi);
     }
 
     /// Port in, from the device to the CPU. Returns the port value

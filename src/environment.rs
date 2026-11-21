@@ -31,16 +31,13 @@ impl<'a> Environment<'_> {
     }
 
     pub fn advance_immediate16(&mut self) -> u16 {
-        let mut value: u16 = self.advance_pc() as u16;
-        value += (self.advance_pc() as u16) << 8;
-        value
+        u16::from_le_bytes([self.advance_pc(), self.advance_pc()])
     }
 
     pub fn push(&mut self, value: u16) {
         let mut sp = self.state.reg.get16(Reg16::SP);
 
-        let h = (value >> 8) as u8;
-        let l = value as u8;
+        let [h, l] = value.to_be_bytes();
 
         sp = sp.wrapping_sub(1);
         self.sys.poke(sp, h);
@@ -61,7 +58,7 @@ impl<'a> Environment<'_> {
         sp = sp.wrapping_add(1);
 
         self.state.reg.set16(Reg16::SP, sp);
-        (l as u16) + ((h as u16) << 8)
+        u16::from_le_bytes([l, h])
     }
 
     pub fn subroutine_call(&mut self, address: u16) {
