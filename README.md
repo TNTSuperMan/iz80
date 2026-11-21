@@ -25,35 +25,12 @@ cargo run --examples cpuville
 ```
 
 ## 使い方
-todo: あとで書く
+810d317時点の結果です
 
 ## テスト結果一覧
-todo: 更新して
 
-### Diagnostics II by Supersoft Associates for Intel 8080
-
-```
-DIAGNOSTICS II V1.2 - CPU TEST
-COPYRIGHT (C) 1981 - SUPERSOFT ASSOCIATES
-
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-CPU IS 8080/8085
-BEGIN TIMING TEST
-END TIMING TEST
-CPU TESTS OK
-```
-### Diagnostics II by Supersoft Associates for Z80
-
-```
-DIAGNOSTICS II V1.2 - CPU TEST
-COPYRIGHT (C) 1981 - SUPERSOFT ASSOCIATES
-
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-CPU IS Z80
-BEGIN TIMING TEST
-END TIMING TEST
-CPU TESTS OK
-```
+### Diagnostics II by Supersoft Associates
+未実施
 
 ### Z80 instruction exerciser ZEXALL
 
@@ -133,30 +110,30 @@ Tests complete
 
 ```
 8080 instruction exerciser (KR580VM80A CPU)
-dad <b,d,h,sp>................  OK
-aluop nn......................  OK
-aluop <b,c,d,e,h,l,m,a>.......  OK
-<daa,cma,stc,cmc>.............  OK
-<inr,dcr> a...................  OK
-<inr,dcr> b...................  OK
-<inx,dcx> b...................  OK
-<inr,dcr> c...................  OK
-<inr,dcr> d...................  OK
-<inx,dcx> d...................  OK
-<inr,dcr> e...................  OK
-<inr,dcr> h...................  OK
-<inx,dcx> h...................  OK
-<inr,dcr> l...................  OK
-<inr,dcr> m...................  OK
-<inx,dcx> sp..................  OK
-lhld nnnn.....................  OK
-shld nnnn.....................  OK
-lxi <b,d,h,sp>,nnnn...........  OK
-ldax <b,d>....................  OK
-mvi <b,c,d,e,h,l,m,a>,nn......  OK
-mov <bcdehla>,<bcdehla>.......  OK
-sta nnnn / lda nnnn...........  OK
-<rlc,rrc,ral,rar>.............  OK
-stax <b,d>....................  OK
+dad <b,d,h,sp>................  ERROR **** crc expected:14474ba6 found:14fe4ad4
+aluop nn......................  ERROR **** crc expected:9e922f9e found:c55a67ed
+aluop <b,c,d,e,h,l,m,a>.......  ERROR **** crc expected:cf762c86 found:bf843d2f
+<daa,cma,stc,cmc>.............  ERROR **** crc expected:bb3f030c found:f63791fc
+<inr,dcr> a...................  ERROR **** crc expected:adb6460e found:0c6c603c
+<inr,dcr> b...................  ERROR **** crc expected:83ed1345 found:67469e8a
+<inx,dcx> b...................  ERROR **** crc expected:f79287cd found:d2236336
+<inr,dcr> c...................  ERROR **** crc expected:e5f6721b found:80c4ffc6
+<inr,dcr> d...................  ERROR **** crc expected:15b5579a found:837cb56e
+<inx,dcx> d...................  ERROR **** crc expected:7f4e2501 found:1e93c274
+<inr,dcr> e...................  ERROR **** crc expected:cf2ab396 found:1ec575be
+<inr,dcr> h...................  ERROR **** crc expected:12b2952c found:27445666
+<inx,dcx> h...................  ERROR **** crc expected:9f2b23c0 found:d14bd4be
+<inr,dcr> l...................  ERROR **** crc expected:ff57d356 found:83c10f90
+<inr,dcr> m...................  ERROR **** crc expected:92e963bd found:5673810f
+<inx,dcx> sp..................  ERROR **** crc expected:d5702fab found:c2cd2924
+lhld nnnn.....................  ERROR **** crc expected:a9c3d5cb found:96d63c1e
+shld nnnn.....................  ERROR **** crc expected:e8864f26 found:47cf4e46
+lxi <b,d,h,sp>,nnnn...........  ERROR **** crc expected:fcf46e12 found:8b8ccdb5
+ldax <b,d>....................  ERROR **** crc expected:2b821d5f found:d1548f37
+mvi <b,c,d,e,h,l,m,a>,nn......  ERROR **** crc expected:eaa72044 found:94b73132
+mov <bcdehla>,<bcdehla>.......  ERROR **** crc expected:10b58cee found:c73eeaf0
+sta nnnn / lda nnnn...........  ERROR **** crc expected:ed57af72 found:1bba391b
+<rlc,rrc,ral,rar>.............  ERROR **** crc expected:e0d89235 found:e2c8edd0
+stax <b,d>....................  ERROR **** crc expected:2b0471e9 found:b1f338a3
 Tests complete
 ```
