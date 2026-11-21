@@ -14,11 +14,6 @@ zexallの実行:
 cargo test --release -- --nocapture --ignored --test zexall
 ```
 
-ex8080の実行(8080は消したので失敗します):
-```shell
-cargo test --release -- --nocapture --ignored --test ex8080
-```
-
 Tiny Basic ([cpuville](http://cpuville.com/Kits/Z80-kits-home.html)):
 ```shell
 cargo run --examples cpuville
