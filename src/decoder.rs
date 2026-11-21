@@ -16,7 +16,7 @@ use super::registers::*;
     http://z80-heaven.wikidot.com/instructions-set
 */
 
-pub struct DecoderZ80<M: Machine> {
+pub struct Decoder<M: Machine> {
     no_prefix: [Opcode<M>; 256],
     prefix_cb: [Opcode<M>; 256],
     prefix_cb_indexed: [Opcode<M>; 256],
@@ -24,9 +24,9 @@ pub struct DecoderZ80<M: Machine> {
     has_displacement: [bool; 256],
 }
 
-impl<M: Machine> DecoderZ80<M> {
-    pub fn new() -> DecoderZ80<M> {
-        DecoderZ80 {
+impl<M: Machine> Decoder<M> {
+    pub fn new() -> Decoder<M> {
+        Decoder {
             no_prefix: no_prefix_opcodes(),
             prefix_cb: cb_prefix_opcodes(),
             prefix_cb_indexed: cb_indexed_prefix_opcodes(),

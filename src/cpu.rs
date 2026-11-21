@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::decoder_z80::DecoderZ80;
+use super::decoder::Decoder;
 use super::environment::Environment;
 use super::machine::Machine;
 use super::registers::{Reg8, Registers};
@@ -14,7 +14,7 @@ const NMI_ADDRESS: u16 = 0x0066;
 /// Executes Z80 instructions changing the cpu State and Machine
 pub struct Cpu<M: Machine> {
     state: State,
-    decoder: DecoderZ80<M>,
+    decoder: Decoder<M>,
 }
 
 // Ensure that the Cpu is Send and Sync and can be used with async code
@@ -28,7 +28,7 @@ impl<M: Machine> Cpu<M> {
     pub fn new() -> Cpu<M> {
         Cpu {
             state: State::new(),
-            decoder: DecoderZ80::new(),
+            decoder: Decoder::new(),
         }
     }
 }
@@ -173,7 +173,7 @@ impl<'de, M: Machine> Deserialize<'de> for Cpu<M> {
     {
         Ok(Cpu {
             state: State::deserialize(deserializer)?,
-            decoder: DecoderZ80::new(),
+            decoder: Decoder::new(),
         })
     }
 }

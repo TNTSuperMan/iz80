@@ -43,7 +43,7 @@ mod registers;
 mod state;
 mod timed_runner;
 
-mod decoder_z80;
+mod decoder;
 mod environment;
 mod opcode;
 mod opcode_alu;
