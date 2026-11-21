@@ -1,13 +1,12 @@
 [package]
 name = "iz80"
 version = "0.5.1"
-authors = ["Ivan Izaguirre <ivanizag@gmail.com>"]
+authors = ["Ivan Izaguirre <ivanizag@gmail.com>", "TNTSuperMan"]
 edition = "2021"
 license = "BSD-3-Clause"
-description = "Z80 and 8080 emulator"
-keywords = ["Z80", "8080", "CPM", "emulator"]
-homepage = "https://github.com/ivanizag/iz80"
-repository = "https://github.com/ivanizag/iz80"
+description = "Z80 emulator"
+keywords = ["Z80", "CPM", "emulator"]
+repository = "https://github.com/TNTSuperMan/iz80"
 readme = "README.md"
 
 [dependencies]
