@@ -1,4 +1,3 @@
-use super::cpu::*;
 use super::environment::*;
 use super::machine::Machine;
 use super::opcode::*;
@@ -25,13 +24,6 @@ pub struct DecoderZ80<M: Machine> {
     has_displacement: [bool; 256],
 }
 
-impl<M: Machine> Decoder<M> for DecoderZ80<M> {
-    fn decode(&self, env: &mut Environment<M>) -> &Opcode<M> {
-        let code = env.advance_pc();
-        self.decode_with_firstcode(env, code)
-    }
-}
-
 impl<M: Machine> DecoderZ80<M> {
     pub fn new() -> DecoderZ80<M> {
         DecoderZ80 {
@@ -41,6 +33,10 @@ impl<M: Machine> DecoderZ80<M> {
             prefix_ed: ed_prefix_opcodes(),
             has_displacement: displacements(),
         }
+    }
+    pub fn decode(&self, env: &mut Environment<M>) -> &Opcode<M> {
+        let code = env.advance_pc();
+        self.decode_with_firstcode(env, code)
     }
     pub fn decode_with_firstcode(&self, env: &mut Environment<M>, code: u8) -> &Opcode<M> {
         let mut code = code;

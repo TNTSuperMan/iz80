@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use super::decoder_z80::DecoderZ80;
 use super::environment::Environment;
 use super::machine::Machine;
-use super::opcode::Opcode;
 use super::registers::{Reg8, Registers};
 use super::state::State;
 
@@ -23,10 +22,6 @@ const _: () = {
     fn assert_send<T: Send + Sync>() {}
     let _ = assert_send::<Cpu<super::machine::PlainMachine>>;
 };
-
-pub(crate) trait Decoder<M: Machine> {
-    fn decode(&self, env: &mut Environment<M>) -> &Opcode<M>;
-}
 
 impl<M: Machine> Cpu<M> {
     /// Returns a Z80 Cpu instance
