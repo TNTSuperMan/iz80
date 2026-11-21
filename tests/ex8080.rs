@@ -42,21 +42,9 @@ fn test_ex8080() {
     }
 
     cpu.registers().set_pc(0x100);
-    let trace = false;
-    cpu.set_trace(trace);
     let mut tests_passed = 0;
     loop {
         cpu.execute_instruction(&mut machine);
-
-        if trace && false {
-            // Test state
-            let addr = 0x1d80_u16;
-            print!("Zex state 0x{addr:04x}: ");
-            for i in 0..0x10 {
-                print!("{:02x} ", machine.peek(addr + i));
-            }
-            println!();
-        }
 
         if cpu.registers().pc() == 0x0000 {
             println!();

@@ -4,7 +4,7 @@ use super::decoder_z80::DecoderZ80;
 use super::environment::Environment;
 use super::machine::Machine;
 use super::opcode::Opcode;
-use super::registers::{Reg16, Reg8, Registers};
+use super::registers::{Reg8, Registers};
 use super::state::State;
 
 const IRQ_ADDRESS: u16 = 0x0038;
@@ -15,7 +15,6 @@ const NMI_ADDRESS: u16 = 0x0066;
 /// Executes Z80 instructions changing the cpu State and Machine
 pub struct Cpu {
     state: State,
-    trace: bool,
     decoder: DecoderZ80,
 }
 
@@ -34,7 +33,6 @@ impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
             state: State::new(),
-            trace: false,
             decoder: DecoderZ80::new(),
         }
     }
@@ -103,38 +101,13 @@ impl Cpu {
             }
         }
 
-        let pc = env.state.reg.pc();
         let opcode = self.decoder.decode(&mut env);
-        if self.trace {
-            print!("==> {:04x}: {:20}", pc, opcode.disasm(&mut env));
-        }
 
         env.clear_branch_taken();
         env.clear_int_just_enabled();
         opcode.execute(&mut env);
         env.advance_cycles(opcode);
         env.clear_index();
-
-        if self.trace {
-            print!(" PC:{:04x} AF:{:04x} BC:{:04x} DE:{:04x} HL:{:04x} SP:{:04x} IX:{:04x} IY:{:04x} Flags:{:08b} Cycle:{:04}",
-                self.state.reg.pc(),
-                self.state.reg.get16(Reg16::AF),
-                self.state.reg.get16(Reg16::BC),
-                self.state.reg.get16(Reg16::DE),
-                self.state.reg.get16(Reg16::HL),
-                self.state.reg.get16(Reg16::SP),
-                self.state.reg.get16(Reg16::IX),
-                self.state.reg.get16(Reg16::IY),
-                self.state.reg.get8(Reg8::F),
-                self.state.cycle
-            );
-            println!(
-                " [{:02x} {:02x} {:02x}]",
-                sys.peek(pc),
-                sys.peek(pc.wrapping_add(1)),
-                sys.peek(pc.wrapping_add(2))
-            );
-        }
     }
 
     /// Returns the instruction in PC disassembled. PC is advanced.
@@ -147,16 +120,6 @@ impl Cpu {
         let mut env = Environment::new(&mut self.state, sys);
         let opcode = self.decoder.decode(&mut env);
         opcode.disasm(&mut env)
-    }
-
-    /// Activates or deactivates traces of the instruction executed and
-    /// the state of the registers.
-    ///
-    /// # Arguments
-    ///
-    /// * `trace` - A bool defining the trace state to set
-    pub fn set_trace(&mut self, trace: bool) {
-        self.trace = trace;
     }
 
     /// Returns a Registers struct to read and write on the Z80 registers
@@ -215,7 +178,6 @@ impl<'de> Deserialize<'de> for Cpu {
     {
         Ok(Cpu {
             state: State::deserialize(deserializer)?,
-            trace: false,
             decoder: DecoderZ80::new(),
         })
     }

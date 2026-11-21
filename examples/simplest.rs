@@ -4,7 +4,6 @@ fn main() {
     // Prepare the device
     let mut machine = PlainMachine::new();
     let mut cpu = Cpu::new();
-    cpu.set_trace(true);
 
     // Load program inline or from a file with:
     //      let code = include_bytes!("XXXX.rom");

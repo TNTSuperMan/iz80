@@ -43,8 +43,6 @@ fn z80test() {
     }
 
     cpu.registers().set_pc(START);
-    let trace = false;
-    cpu.set_trace(trace);
     let mut msg = String::new();
     loop {
         cpu.execute_instruction(&mut machine);

@@ -32,18 +32,9 @@ fn cpu_test(mut cpu: Cpu) {
     }
 
     cpu.registers().set_pc(0x100);
-    let trace = false;
-    cpu.set_trace(trace);
     let mut msg = String::new();
     loop {
         cpu.execute_instruction(&mut machine);
-
-        // Avoid tracing the long loop
-        if cpu.registers().pc() == 0x31b3 {
-            cpu.set_trace(false);
-        } else if cpu.registers().pc() == 0x31b5 {
-            cpu.set_trace(trace);
-        }
 
         if cpu.registers().pc() == 0x0000 {
             println!();
