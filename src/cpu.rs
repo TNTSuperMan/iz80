@@ -14,7 +14,7 @@ const NMI_ADDRESS: u16 = 0x0066;
 /// Executes Z80 instructions changing the cpu State and Machine
 pub struct Cpu<M: Machine> {
     state: State,
-    decoder: Decoder<M>,
+    decoder: Box<Decoder<M>>,
 }
 
 // Ensure that the Cpu is Send and Sync and can be used with async code
@@ -28,7 +28,7 @@ impl<M: Machine> Cpu<M> {
     pub fn new() -> Cpu<M> {
         Cpu {
             state: State::new(),
-            decoder: Decoder::new(),
+            decoder: Box::new(Decoder::new()),
         }
     }
 }
@@ -173,7 +173,7 @@ impl<'de, M: Machine> Deserialize<'de> for Cpu<M> {
     {
         Ok(Cpu {
             state: State::deserialize(deserializer)?,
-            decoder: Decoder::new(),
+            decoder: Box::new(Decoder::new()),
         })
     }
 }
