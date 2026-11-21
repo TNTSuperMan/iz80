@@ -1,5 +1,9 @@
-use iz80::*;
+// use iz80::*;
 
+// 元々は8080固有のフラグ更新のテストだったが、e37ed8fで8080デコーダーをZ80に置き換えたため失敗する
+// zexallで代替するということで一旦コメントアウト
+
+/*
 #[test]
 fn test_cp_a() {
     let mut sys = PlainMachine::new();
@@ -29,3 +33,4 @@ fn test_cp_a_2() {
 
     assert!(cpu.registers().get_flag(Flag::H));
 }
+*/
