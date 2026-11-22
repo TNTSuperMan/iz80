@@ -9,5 +9,9 @@ keywords = ["Z80", "CPM", "emulator"]
 repository = "https://github.com/TNTSuperMan/iz80"
 readme = "README.md"
 
+[features]
+default = ["disasm"]
+disasm = []
+
 [dependencies]
 serde = { version = "1.0.229", features = ["derive"] }

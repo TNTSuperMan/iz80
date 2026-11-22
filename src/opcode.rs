@@ -5,6 +5,7 @@ use super::registers::Reg16;
 type OpcodeFn<M> = dyn for<'a> Fn(&mut Environment<'a, M>) + Send + Sync;
 
 pub struct Opcode<M: Machine> {
+    #[cfg(feature = "disasm")]
     pub name: String,
     pub cycles: u8,
     pub cycles_conditional: u8,
@@ -12,12 +13,13 @@ pub struct Opcode<M: Machine> {
 }
 
 impl<M: Machine> Opcode<M> {
-    pub(crate) fn new<T>(name: String, action: T) -> Opcode<M>
+    pub(crate) fn new<T>(_name: String, action: T) -> Opcode<M>
     where
         T: for<'a> Fn(&mut Environment<'a, M>) + Send + Sync + 'static,
     {
         Opcode {
-            name,
+            #[cfg(feature = "disasm")]
+            name: _name,
             cycles: 0,
             cycles_conditional: 0,
             action: Box::new(action),
@@ -28,6 +30,7 @@ impl<M: Machine> Opcode<M> {
         (self.action)(env);
     }
 
+    #[cfg(feature = "disasm")]
     pub fn disasm(&self, env: &mut Environment<M>) -> String {
         let name = if self.name.contains("__index") {
             self.name.replace("__index", &env.index_description())

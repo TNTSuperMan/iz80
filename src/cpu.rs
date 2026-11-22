@@ -111,6 +111,7 @@ impl<M: Machine> Cpu<M> {
     ///
     /// * `sys` - A representation of the emulated machine that has the Machine trait
     ///
+    #[cfg(feature = "disasm")]
     pub fn disasm_instruction(&mut self, sys: &mut M) -> String {
         let mut env = Environment::new(&mut self.state, sys);
         let opcode = self.decoder.decode(&mut env);

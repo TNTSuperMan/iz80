@@ -13,6 +13,7 @@ impl<'a, M: Machine> Environment<'_, M> {
         Environment { state, sys }
     }
 
+    #[cfg(feature = "disasm")]
     pub fn peek_pc(&mut self) -> u8 {
         let pc = self.state.reg.pc();
         self.sys.peek(pc)
@@ -25,6 +26,7 @@ impl<'a, M: Machine> Environment<'_, M> {
         value
     }
 
+    #[cfg(feature = "disasm")]
     pub fn peek16_pc(&mut self) -> u16 {
         let pc = self.state.reg.pc();
         self.sys.peek16(pc)
@@ -100,6 +102,7 @@ impl<'a, M: Machine> Environment<'_, M> {
         self.state.cycle = self.state.cycle.wrapping_add(cycles as u64);
     }
 
+    #[cfg(feature = "disasm")]
     pub fn index_description(&self) -> String {
         if self.state.index == Reg16::HL {
             "HL".to_string()
