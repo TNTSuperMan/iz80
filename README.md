@@ -24,10 +24,8 @@ Tiny Basic ([cpuville](http://cpuville.com/Kits/Z80-kits-home.html)):
 cargo run --examples cpuville
 ```
 
-## 使い方
-810d317時点の結果です
-
 ## テスト結果一覧
+810d317時点の結果です
 
 ### Diagnostics II by Supersoft Associates
 未実施
